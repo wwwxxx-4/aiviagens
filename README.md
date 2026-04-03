@@ -120,3 +120,4 @@ inteligenciaviagens/
 | Supabase | Banco de dados + Auth | Grátis até 500MB | supabase.com |
 | OpenWeather | Clima do destino | Grátis 60 req/min | openweathermap.org |
 | ExchangeRate | Cotação de moedas | Grátis 1500 req/mês | exchangerate-api.com |
+ 
