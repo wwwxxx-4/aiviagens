@@ -5,12 +5,13 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.googleusercontent.com' },
       { protocol: 'https', hostname: '**.serpapi.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
-      { protocol: 'https', hostname: '**.baserow-backend-production20240528124524339000000001.s3.amazonaws.com' },
       { protocol: 'https', hostname: '**.s3.amazonaws.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
-  serverExternalPackages: ['@anthropic-ai/sdk'],
+  experimental: {
+    serverComponentsExternalPackages: ['@anthropic-ai/sdk'],
+  },
 }
 
 module.exports = nextConfig
