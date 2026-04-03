@@ -11,7 +11,7 @@ export const maxDuration = 60
 
 const LLMTOOLS: LLMTool[] = TRAVEL_TOOLS.map(t => ({
   name: t.name,
-  description: t.description,
+  description: t.description ?? '',
   parameters: t.input_schema as Record<string, unknown>,
 }))
 
