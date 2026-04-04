@@ -27,7 +27,7 @@ export function createLLMProvider(
     case 'anthropic': {
       const key = process.env.ANTHROPIC_API_KEY
       if (!key) throw new Error('ANTHROPIC_API_KEY não configurada no .env.local')
-      return new AnthropicProvider(key, modelId || 'claude-sonnet-4-20250514')
+      return new AnthropicProvider(key, modelId || 'claude-3-5-sonnet-20241022')
     }
 
     case 'openai': {

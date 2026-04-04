@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   if (!pkg) return new Response('Package not found', { status: 404 })
 
   const { data: profile } = await supabase
-    .from('profiles')
+    .from('travel_profiles')
     .select('full_name, email')
     .eq('id', user.id)
     .single()

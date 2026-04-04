@@ -11,8 +11,8 @@ import type {
 
 export const ANTHROPIC_MODELS: LLMModel[] = [
   {
-    id: 'claude-sonnet-4-20250514',
-    name: 'Claude Sonnet 4',
+    id: 'claude-3-5-sonnet-20241022',
+    name: 'Claude 3.5 Sonnet',
     contextWindow: 200000,
     supportsTools: true,
     costPer1kInput: 0.003,
@@ -20,20 +20,20 @@ export const ANTHROPIC_MODELS: LLMModel[] = [
     recommended: true,
   },
   {
-    id: 'claude-opus-4-5',
-    name: 'Claude Opus 4.5',
+    id: 'claude-3-5-haiku-20241022',
+    name: 'Claude 3.5 Haiku',
+    contextWindow: 200000,
+    supportsTools: true,
+    costPer1kInput: 0.0008,
+    costPer1kOutput: 0.004,
+  },
+  {
+    id: 'claude-3-opus-20240229',
+    name: 'Claude 3 Opus',
     contextWindow: 200000,
     supportsTools: true,
     costPer1kInput: 0.015,
     costPer1kOutput: 0.075,
-  },
-  {
-    id: 'claude-haiku-4-5-20251001',
-    name: 'Claude Haiku 4.5',
-    contextWindow: 200000,
-    supportsTools: true,
-    costPer1kInput: 0.00025,
-    costPer1kOutput: 0.00125,
   },
 ]
 
@@ -61,7 +61,7 @@ export class AnthropicProvider implements LLMProvider {
   private client: Anthropic
   private model: string
 
-  constructor(apiKey: string, model: string = 'claude-sonnet-4-20250514') {
+  constructor(apiKey: string, model: string = 'claude-3-5-sonnet-20241022') {
     this.client = new Anthropic({ apiKey })
     this.model = model
   }
