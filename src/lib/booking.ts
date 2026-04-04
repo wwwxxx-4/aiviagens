@@ -78,7 +78,7 @@ export function applyMarkup(price: number, type: 'flights' | 'hotels' | 'activit
 
 export function flightWhatsAppMessage(p: {
   origin: string; destination: string; outbound_date: string
-  return_date?: string; adults: number; airline?: string
+  return_date?: string; adults: number; airline?: string; price?: number; currency?: string
 }): string {
   const cfg = getAgencySettings()
   return [`Olá ${cfg.agencyName}! Tenho interesse em uma passagem:`,

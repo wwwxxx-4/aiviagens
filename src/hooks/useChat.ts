@@ -103,7 +103,7 @@ export function useChat(initialConversationId?: string): UseChatReturn {
                 updateLast(m => ({ ...m, tools_running: [...(m.tools_running || []), event.tool] }))
                 break
               case 'agency_packages_found':
-              updateLastMsg({ agency_packages: data.packages })
+              updateLast(m => ({ ...m, agency_packages: event.packages }))
               break
             case 'flights_found':
                 updateLast(m => ({ ...m, flights: event.flights, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_flights') }))

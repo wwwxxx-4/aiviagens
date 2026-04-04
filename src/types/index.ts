@@ -156,6 +156,9 @@ export interface TravelPackage {
   hotel?: HotelResult
   activities: ActivityResult[]
   weather?: WeatherData
+  flight_data?: { flights?: FlightResult[] }
+  hotel_data?: { hotels?: HotelResult[] }
+  activities_data?: ActivityResult[]
   total_price: number
   currency: string
   status: 'draft' | 'saved' | 'booked'

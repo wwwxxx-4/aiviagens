@@ -39,7 +39,7 @@ async function setCache(key: string, data: unknown, type: string, ttlMinutes = 6
 // ─── Flights ─────────────────────────────────────────────────────────────────
 
 export async function searchFlights(params: SearchFlightsParams): Promise<FlightResult[]> {
-  const cacheKey = generateCacheKey('flights', params as Record<string, string | number | undefined>)
+  const cacheKey = generateCacheKey('flights', params as unknown as Record<string, string | number | undefined>)
   const cached = await getCached<FlightResult[]>(cacheKey)
   if (cached) return cached
 
@@ -158,7 +158,7 @@ export async function searchFlights(params: SearchFlightsParams): Promise<Flight
 // ─── Hotels ──────────────────────────────────────────────────────────────────
 
 export async function searchHotels(params: SearchHotelsParams): Promise<HotelResult[]> {
-  const cacheKey = generateCacheKey('hotels', params as Record<string, string | number | undefined>)
+  const cacheKey = generateCacheKey('hotels', params as unknown as Record<string, string | number | undefined>)
   const cached = await getCached<HotelResult[]>(cacheKey)
   if (cached) return cached
 
