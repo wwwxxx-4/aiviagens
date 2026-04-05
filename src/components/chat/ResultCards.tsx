@@ -1,30 +1,38 @@
 'use client'
 
-import { Hotel, Star, MapPin, MessageCircle, ExternalLink, Bookmark } from 'lucide-react'
+import { useState } from 'react'
+import { Star, MapPin, MessageCircle, ExternalLink, Bookmark, Check, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { applyMarkup, generateHotelBookingUrl, generateActivitiesUrl, generateWhatsAppUrl, getAgencySettings } from '@/lib/booking'
+import { useSaveToPackage } from '@/hooks/useSaveToPackage'
 import type { HotelResult, ActivityResult } from '@/types'
 
-// ─── Save to package helper ───────────────────────────────────────────────────
-
-async function saveItem(type: 'hotel' | 'activity', name: string) {
-  // Store in sessionStorage to be picked up by ChatWindow's "save package" flow
-  const existing = JSON.parse(sessionStorage.getItem('iv_selected_items') || '{}')
-  if (type === 'hotel') existing.hotel = name
-  else { existing.activities = [...(existing.activities || []), name] }
-  sessionStorage.setItem('iv_selected_items', JSON.stringify(existing))
-
-  // Visual feedback
-  return true
+function calcNights(checkIn?: string, checkOut?: string): number | null {
+  if (!checkIn || !checkOut) return null
+  const d1 = new Date(checkIn)
+  const d2 = new Date(checkOut)
+  const diff = Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24))
+  return diff > 0 ? diff : null
 }
 
-// ─── Hotel Card ───────────────────────────────────────────────────────────────
+// ─── Hotel Card ────────────────────────────────────────────────────────────────
 
-export function HotelCard({ hotel, onSave }: { hotel: HotelResult; onSave?: () => void }) {
+export function HotelCard({ hotel, nights: nightsProp }: { hotel: HotelResult; nights?: number }) {
   const cfg = getAgencySettings()
-  const displayPrice = applyMarkup(hotel.price_per_night, 'hotels')
+  const displayPricePerNight = applyMarkup(hotel.price_per_night, 'hotels')
+  const nights = nightsProp ?? calcNights(hotel.check_in, hotel.check_out) ?? 1
+  const totalPrice = displayPricePerNight * nights
   const bookingUrl = generateHotelBookingUrl()
-  const waMsg = `Olá ${cfg.agencyName}! Tenho interesse no hotel:\n🏨 ${hotel.name}\n💰 A partir de ${formatCurrency(displayPrice, hotel.currency)}/noite\n\nPoderia me ajudar com a reserva?`
+  const waMsg = `Olá ${cfg.agencyName}! Tenho interesse no hotel:\n🏨 ${hotel.name}\n💰 ${formatCurrency(displayPricePerNight, hotel.currency)}/noite × ${nights} noites = ${formatCurrency(totalPrice, hotel.currency)}\n\nPoderia me ajudar com a reserva?`
+
+  const [saved, setSaved] = useState(false)
+  const { saving, saveHotel } = useSaveToPackage()
+  const isSaving = saving === hotel.id
+
+  async function handleSave() {
+    const id = await saveHotel(hotel, 1, nights)
+    if (id) setSaved(true)
+  }
 
   return (
     <div className="bg-white rounded-xl border border-black/5 overflow-hidden hover:border-brand-200 transition-all">
@@ -54,53 +62,79 @@ export function HotelCard({ hotel, onSave }: { hotel: HotelResult; onSave?: () =
           </div>
         )}
 
-        {/* Price note */}
-        <p className="text-xs text-gray-400 mb-2 italic">Consulte disponibilidade e preencha os dados no site da reserva.</p>
-
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <span className="text-base font-bold text-brand-600">{formatCurrency(displayPrice, hotel.currency)}</span>
-            <span className="text-xs text-gray-400 ml-1">/noite</span>
-          </div>
-          <div className="flex gap-1">
-            {onSave && (
-              <button onClick={onSave}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 text-xs font-medium border border-gray-100 hover:border-brand-200 transition-all">
-                <Bookmark size={10} /> Salvar
-              </button>
+        {/* Preço total + disclaimer */}
+        <div className="bg-brand-50 rounded-lg px-2.5 py-2 mb-2.5">
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-base font-bold text-brand-600">{formatCurrency(totalPrice, hotel.currency)}</span>
+            <span className="text-xs text-gray-500">total</span>
+            {nights > 1 && (
+              <span className="text-xs text-gray-400">
+                ({formatCurrency(displayPricePerNight, hotel.currency)}/noite × {nights} noites)
+              </span>
             )}
-            <a href={generateWhatsAppUrl(waMsg)} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors">
-              <MessageCircle size={10} /> WhatsApp
-            </a>
-            <a href={bookingUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors">
-              <ExternalLink size={10} /> Reservar
-            </a>
           </div>
+        </div>
+        <div className="flex items-start gap-1 mb-2.5">
+          <AlertCircle size={9} className="text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-gray-400 italic">Podem haver taxas adicionais. Valores sujeitos a alteração.</p>
+        </div>
+
+        <div className="flex gap-1.5 flex-wrap">
+          <button
+            onClick={handleSave}
+            disabled={isSaving || saved}
+            className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+              saved
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : 'bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 border-gray-100 hover:border-brand-200'
+            }`}
+          >
+            {saved ? <Check size={10} /> : <Bookmark size={10} />}
+            {saved ? 'Salvo!' : isSaving ? '...' : 'Salvar'}
+          </button>
+          <a href={generateWhatsAppUrl(waMsg)} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors">
+            <MessageCircle size={10} /> WhatsApp
+          </a>
+          <a href={bookingUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors">
+            <ExternalLink size={10} /> Reservar
+          </a>
         </div>
       </div>
     </div>
   )
 }
 
-export function HotelResults({ hotels, onSave }: { hotels: HotelResult[]; onSave?: (hotel: HotelResult) => void }) {
+export function HotelResults({ hotels, checkIn, checkOut }: { hotels: HotelResult[]; checkIn?: string; checkOut?: string }) {
+  const nights = calcNights(checkIn, checkOut) ?? undefined
   return (
     <div className="mt-3">
-      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">🏨 {hotels.length} hotéis encontrados</p>
+      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+        🏨 {hotels.length} hotéis encontrados{nights ? ` · ${nights} noites` : ''}
+      </p>
       <div className="grid grid-cols-2 gap-2">
-        {hotels.slice(0, 4).map(h => <HotelCard key={h.id} hotel={h} onSave={onSave ? () => onSave(h) : undefined} />)}
+        {hotels.slice(0, 4).map(h => <HotelCard key={h.id} hotel={h} nights={nights} />)}
       </div>
     </div>
   )
 }
 
-// ─── Activity Card ────────────────────────────────────────────────────────────
+// ─── Activity Card ─────────────────────────────────────────────────────────────
 
-export function ActivityCard({ activity, onSave }: { activity: ActivityResult; onSave?: () => void }) {
+export function ActivityCard({ activity }: { activity: ActivityResult }) {
   const cfg = getAgencySettings()
   const activitiesUrl = generateActivitiesUrl()
   const waMsg = `Olá ${cfg.agencyName}! Tenho interesse na atividade:\n🗺️ ${activity.name}${activity.address ? `\n📍 ${activity.address}` : ''}\n\nPoderia me ajudar?`
+
+  const [saved, setSaved] = useState(false)
+  const { saving, saveActivity } = useSaveToPackage()
+  const isSaving = saving === activity.id
+
+  async function handleSave() {
+    const id = await saveActivity(activity)
+    if (id) setSaved(true)
+  }
 
   return (
     <div className="bg-white rounded-xl border border-black/5 p-3 hover:border-brand-200 transition-all flex gap-3">
@@ -122,20 +156,26 @@ export function ActivityCard({ activity, onSave }: { activity: ActivityResult; o
             {activity.reviews_count && <span className="text-gray-400"> ({activity.reviews_count.toLocaleString()})</span>}
           </p>
         )}
-        <div className="flex gap-1 mt-2 flex-wrap">
-          {onSave && (
-            <button onClick={onSave}
-              className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 text-xs border border-gray-100 hover:border-brand-200 transition-all">
-              <Bookmark size={9} /> Salvar
-            </button>
-          )}
+        <div className="flex gap-1.5 mt-2 flex-wrap">
+          <button
+            onClick={handleSave}
+            disabled={isSaving || saved}
+            className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs border transition-all ${
+              saved
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : 'bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 border-gray-100 hover:border-brand-200'
+            }`}
+          >
+            {saved ? <Check size={9} /> : <Bookmark size={9} />}
+            {saved ? 'Salvo!' : isSaving ? '...' : 'Salvar'}
+          </button>
           <a href={generateWhatsAppUrl(waMsg)} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 hover:bg-green-100 text-green-700 text-xs border border-green-100 transition-colors">
             <MessageCircle size={9} /> WhatsApp
           </a>
           <a href={activitiesUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 px-2 py-1 rounded-md bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs border border-brand-100 transition-colors">
-            <ExternalLink size={9} /> Ver no Civitatis
+            <ExternalLink size={9} /> Ver passeio
           </a>
         </div>
       </div>
@@ -143,12 +183,12 @@ export function ActivityCard({ activity, onSave }: { activity: ActivityResult; o
   )
 }
 
-export function ActivityResults({ activities, onSave }: { activities: ActivityResult[]; onSave?: (a: ActivityResult) => void }) {
+export function ActivityResults({ activities }: { activities: ActivityResult[] }) {
   return (
     <div className="mt-3">
       <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">🗺️ {activities.length} atividades e atrações</p>
       <div className="space-y-2">
-        {activities.slice(0, 4).map(a => <ActivityCard key={a.id} activity={a} onSave={onSave ? () => onSave(a) : undefined} />)}
+        {activities.slice(0, 4).map(a => <ActivityCard key={a.id} activity={a} />)}
       </div>
     </div>
   )

@@ -93,6 +93,8 @@ export interface HotelResult {
   amenities?: string[]
   description?: string
   booking_url?: string
+  check_in?: string
+  check_out?: string
   raw?: Record<string, unknown>
 }
 

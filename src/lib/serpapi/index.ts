@@ -194,6 +194,8 @@ export async function searchHotels(params: SearchHotelsParams): Promise<HotelRes
       amenities: h.amenities?.slice(0, 6),
       description: h.description,
       booking_url: h.link,
+      check_in: params.check_in,
+      check_out: params.check_out,
       raw: raw,
     }
   })

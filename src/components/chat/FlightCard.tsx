@@ -1,8 +1,10 @@
 'use client'
 
-import { Plane, MessageCircle, ExternalLink } from 'lucide-react'
+import { useState } from 'react'
+import { Plane, MessageCircle, ExternalLink, Bookmark, Check } from 'lucide-react'
 import { formatCurrency, formatStops } from '@/lib/utils'
 import { applyMarkup, generateFlightBookingUrl, generateWhatsAppUrl, flightWhatsAppMessage, DEFAULT_BOOKING_CONFIG } from '@/lib/booking'
+import { useSaveToPackage } from '@/hooks/useSaveToPackage'
 import type { FlightResult } from '@/types'
 
 type FlightWithReturn = FlightResult & {
@@ -22,7 +24,6 @@ type FlightWithReturn = FlightResult & {
 
 function getTime(datetime?: string) {
   if (!datetime) return '--:--'
-  // Handle "YYYY-MM-DD HH:MM" or "HH:MM" formats
   const parts = datetime.split(' ')
   return parts[parts.length - 1].slice(0, 5)
 }
@@ -31,6 +32,9 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
   const f = flight as FlightWithReturn
   const hasReturn = !!f.return_flight
   const displayPrice = applyMarkup(flight.price)
+  const [saved, setSaved] = useState(false)
+  const { saving, saveFlight } = useSaveToPackage()
+  const isSaving = saving === flight.id
 
   const bookingUrl = generateFlightBookingUrl({
     origin: flight.origin,
@@ -51,6 +55,11 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
     currency: flight.currency,
   })
   const waUrl = generateWhatsAppUrl(waMessage)
+
+  async function handleSave() {
+    const id = await saveFlight(flight)
+    if (id) setSaved(true)
+  }
 
   return (
     <div className="bg-white rounded-xl border border-black/5 overflow-hidden hover:border-brand-200 transition-all">
@@ -87,8 +96,8 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
         )}
       </div>
 
-      {/* Price + CTA */}
-      <div className="px-3 pb-3 pt-1 flex items-center justify-between gap-2">
+      {/* Price + CTAs */}
+      <div className="px-3 pb-3 pt-1 flex flex-wrap items-center justify-between gap-2">
         <div>
           <span className="text-lg font-bold text-brand-600">
             {formatCurrency(displayPrice, flight.currency)}
@@ -97,23 +106,38 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
             {hasReturn ? 'ida e volta' : 'só ida'} / pessoa
           </span>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
+          {/* Salvar */}
+          <button
+            onClick={handleSave}
+            disabled={isSaving || saved}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+              saved
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : 'bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 border-gray-100 hover:border-brand-200'
+            }`}
+          >
+            {saved ? <Check size={11} /> : <Bookmark size={11} />}
+            {saved ? 'Salvo!' : isSaving ? '...' : 'Salvar'}
+          </button>
+          {/* WhatsApp */}
           <a
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors"
           >
-            <MessageCircle size={12} />
+            <MessageCircle size={11} />
             WhatsApp
           </a>
+          {/* Comprar */}
           <a
             href={bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors"
           >
-            <ExternalLink size={12} />
+            <ExternalLink size={11} />
             Comprar
           </a>
         </div>
@@ -156,7 +180,7 @@ function FlightLeg({ label, airline, logo, origin, destination, depTime, arrTime
         <div className="flex-1 flex flex-col items-center">
           <div className="w-full flex items-center gap-0.5">
             <div className="flex-1 h-px bg-gray-200" />
-            <Plane size={8} className="text-gray-300 -rotate-0" />
+            <Plane size={8} className="text-gray-300" />
             <div className="flex-1 h-px bg-gray-200" />
           </div>
           <span className="text-xs text-gray-400">{duration}</span>

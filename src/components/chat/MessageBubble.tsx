@@ -65,6 +65,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     )
   }
 
+  const hasCards = (
+    (msg.agency_packages && msg.agency_packages.length > 0) ||
+    (message.flights && message.flights.length > 0) ||
+    (message.hotels && message.hotels.length > 0) ||
+    (message.activities && message.activities.length > 0)
+  )
+
   return (
     <div className="flex gap-3 animate-slide-up">
       {/* AI avatar */}
@@ -78,7 +85,36 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           <ToolIndicator tools={message.tools_running} />
         )}
 
-        {/* Message text */}
+        {/* ─── CARDS PRIMEIRO ─────────────────────────────── */}
+        {hasCards && (
+          <div className="mb-3">
+            {/* Agency packages */}
+            {msg.agency_packages && msg.agency_packages.length > 0 && (
+              <AgencyPackageResults packages={msg.agency_packages} />
+            )}
+
+            {/* Flight results */}
+            {message.flights && message.flights.length > 0 && (
+              <FlightResults flights={message.flights} />
+            )}
+
+            {/* Hotel results */}
+            {message.hotels && message.hotels.length > 0 && (
+              <HotelResults
+                hotels={message.hotels}
+                checkIn={message.hotel_check_in}
+                checkOut={message.hotel_check_out}
+              />
+            )}
+
+            {/* Activity results */}
+            {message.activities && message.activities.length > 0 && (
+              <ActivityResults activities={message.activities} />
+            )}
+          </div>
+        )}
+
+        {/* ─── TEXTO DEPOIS DOS CARDS ──────────────────────── */}
         {message.content && (
           <div
             className="prose-chat text-sm text-gray-800 leading-relaxed"
@@ -87,7 +123,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         )}
 
         {/* Streaming cursor */}
-        {message.status === 'streaming' && !message.content && (
+        {message.status === 'streaming' && !message.content && !hasCards && (
           <div className="flex gap-1 mt-1 items-center">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-400 typing-dot" />
             <div className="w-1.5 h-1.5 rounded-full bg-brand-400 typing-dot" />
@@ -101,26 +137,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             <AlertCircle size={12} />
             {message.content || 'Ocorreu um erro. Tente novamente.'}
           </div>
-        )}
-
-        {/* Agency packages — mostrar ANTES dos voos avulsos */}
-        {msg.agency_packages && msg.agency_packages.length > 0 && (
-          <AgencyPackageResults packages={msg.agency_packages} />
-        )}
-
-        {/* Flight results */}
-        {message.flights && message.flights.length > 0 && (
-          <FlightResults flights={message.flights} />
-        )}
-
-        {/* Hotel results */}
-        {message.hotels && message.hotels.length > 0 && (
-          <HotelResults hotels={message.hotels} />
-        )}
-
-        {/* Activity results */}
-        {message.activities && message.activities.length > 0 && (
-          <ActivityResults activities={message.activities} />
         )}
       </div>
     </div>

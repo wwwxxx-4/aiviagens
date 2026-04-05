@@ -12,6 +12,8 @@ export interface ChatMessage {
   agency_packages?: unknown[]
   flights?: FlightResult[]
   hotels?: HotelResult[]
+  hotel_check_in?: string
+  hotel_check_out?: string
   activities?: ActivityResult[]
   weather?: unknown
   tools_running?: string[]
@@ -109,7 +111,7 @@ export function useChat(initialConversationId?: string): UseChatReturn {
                 updateLast(m => ({ ...m, flights: event.flights, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_flights') }))
                 break
               case 'hotels_found':
-                updateLast(m => ({ ...m, hotels: event.hotels, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_hotels') }))
+                updateLast(m => ({ ...m, hotels: event.hotels, hotel_check_in: event.check_in, hotel_check_out: event.check_out, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_hotels') }))
                 break
               case 'activities_found':
                 updateLast(m => ({ ...m, activities: event.activities, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_activities') }))
