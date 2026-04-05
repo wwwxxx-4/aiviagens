@@ -79,7 +79,12 @@ export async function fetchAgencyPackages(): Promise<AgencyPackage[]> {
       const preco = parsePrice(p.preco)
       const hotel = String(p.hotel || '')
       const hotelLower = hotel.toLowerCase()
-      const imagem = String(p.imagem_destino || p.cover_image_url || '')
+      // imagem_destino pode ter múltiplas URLs separadas por newline — escolhe uma aleatoriamente
+      const imagemRaw = String(p.imagem_destino || p.cover_image_url || '')
+      const imagemUrls = imagemRaw.split('\n').map(u => u.trim()).filter(u => u.startsWith('http'))
+      const imagem = imagemUrls.length > 0
+        ? imagemUrls[Math.floor(Math.random() * imagemUrls.length)]
+        : imagemRaw
 
       return {
         id: String(p.id),

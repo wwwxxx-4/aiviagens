@@ -82,7 +82,7 @@ export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
               <Globe size={14} className="text-white" />
             </div>
             <span className="font-display text-sm font-semibold text-brand-700 leading-tight">
-              Inteligência<br />Viagens
+              AI Mesquita<br />Turismo
             </span>
           </Link>
         </div>

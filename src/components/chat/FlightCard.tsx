@@ -28,10 +28,11 @@ function getTime(datetime?: string) {
   return parts[parts.length - 1].slice(0, 5)
 }
 
-export function FlightCard({ flight }: { flight: FlightResult }) {
+export function FlightCard({ flight, adults = 1 }: { flight: FlightResult; adults?: number }) {
   const f = flight as FlightWithReturn
   const hasReturn = !!f.return_flight
   const displayPrice = applyMarkup(flight.price)
+  const totalPrice = displayPrice * Math.max(adults, 1)
   const [saved, setSaved] = useState(false)
   const { saving, saveFlight } = useSaveToPackage()
   const isSaving = saving === flight.id
@@ -41,7 +42,7 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
     destination: flight.destination,
     outbound_date: (flight.departure_time || '').split(' ')[0] || '',
     return_date: hasReturn ? (f.return_flight!.departure_time || '').split(' ')[0] || undefined : undefined,
-    adults: 1,
+    adults,
   })
 
   const waMessage = flightWhatsAppMessage({
@@ -49,7 +50,7 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
     destination: flight.destination,
     outbound_date: (flight.departure_time || '').split(' ')[0] || '',
     return_date: hasReturn ? (f.return_flight!.departure_time || '').split(' ')[0] : undefined,
-    adults: 1,
+    adults,
     airline: flight.airline,
     price: displayPrice,
     currency: flight.currency,
@@ -97,15 +98,26 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
       </div>
 
       {/* Price + CTAs */}
-      <div className="px-3 pb-3 pt-1 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <span className="text-lg font-bold text-brand-600">
-            {formatCurrency(displayPrice, flight.currency)}
-          </span>
-          <span className="text-xs text-gray-400 ml-1">
-            {hasReturn ? 'ida e volta' : 'só ida'} / pessoa
-          </span>
+      <div className="px-3 pb-3 pt-1">
+        <div className="bg-brand-50 rounded-lg px-2.5 py-2 mb-1.5">
+          <div className="flex items-baseline gap-1 flex-wrap">
+            {adults > 1 ? (
+              <>
+                <span className="text-base font-bold text-brand-600">{formatCurrency(totalPrice, flight.currency)}</span>
+                <span className="text-xs text-gray-500">total</span>
+                <span className="text-xs text-gray-400">({formatCurrency(displayPrice, flight.currency)}/pessoa × {adults})</span>
+              </>
+            ) : (
+              <>
+                <span className="text-base font-bold text-brand-600">{formatCurrency(displayPrice, flight.currency)}</span>
+                <span className="text-xs text-gray-400">{hasReturn ? 'ida e volta' : 'só ida'} / pessoa</span>
+              </>
+            )}
+          </div>
         </div>
+        <p className="text-xs text-gray-400 italic mb-2">* Preços sujeitos a taxas e disponibilidade.</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div />
         <div className="flex gap-1.5 flex-wrap">
           {/* Salvar */}
           <button
@@ -140,6 +152,7 @@ export function FlightCard({ flight }: { flight: FlightResult }) {
             <ExternalLink size={11} />
             Comprar
           </a>
+        </div>
         </div>
       </div>
     </div>
@@ -197,7 +210,7 @@ function FlightLeg({ label, airline, logo, origin, destination, depTime, arrTime
   )
 }
 
-export function FlightResults({ flights }: { flights: FlightResult[] }) {
+export function FlightResults({ flights, adults }: { flights: FlightResult[]; adults?: number }) {
   return (
     <div className="mt-3">
       <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
@@ -205,7 +218,7 @@ export function FlightResults({ flights }: { flights: FlightResult[] }) {
       </p>
       <div className="space-y-2">
         {flights.slice(0, 4).map(f => (
-          <FlightCard key={f.id} flight={f} />
+          <FlightCard key={f.id} flight={f} adults={adults} />
         ))}
       </div>
     </div>

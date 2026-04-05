@@ -10,16 +10,16 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50:  '#E6FAF4',
-          100: '#C2F0E0',
-          200: '#85DFC0',
-          300: '#42C99A',
-          400: '#1DB87A',
-          500: '#0F9E64',
-          600: '#0A7D4F',
-          700: '#065C3A',
-          800: '#033D26',
-          900: '#011F13',
+          50:  '#E6F0FF',
+          100: '#CCE0FF',
+          200: '#99BFFF',
+          300: '#66A0FF',
+          400: '#3380FF',
+          500: '#0066FF',
+          600: '#0052CC',
+          700: '#003D99',
+          800: '#002966',
+          900: '#001A3D',
         },
         ocean: {
           50:  '#EEF4FF',
@@ -66,7 +66,7 @@ const config: Config = {
         typing: { '0%, 100%': { opacity: '0.2' }, '50%': { opacity: '1' } },
       },
       backgroundImage: {
-        'hero-pattern': "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230F9E64' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+        'hero-pattern': "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230066FF' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
       },
     },
   },

@@ -7,7 +7,7 @@ const features = [
   {
     icon: Plane,
     title: 'Voos em tempo real',
-    desc: 'Busca nos melhores preços do Google Flights via SerpApi.',
+    desc: 'Busca nos melhores preços da internet.',
     color: 'text-ocean-500',
     bg: 'bg-ocean-50',
   },
@@ -38,7 +38,7 @@ const stats = [
   { value: '200+', label: 'Destinos buscados' },
   { value: 'Tempo real', label: 'Dados atualizados' },
   { value: 'Bilíngue', label: 'PT & EN' },
-  { value: 'IA', label: 'Claude AI' },
+  { value: 'IA', label: 'Mesquita Turismo' },
 ]
 
 const suggestions = [
@@ -50,16 +50,16 @@ const suggestions = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#FDFAF5]">
+    <div className="min-h-screen bg-[#F5F8FF]">
       {/* Navbar */}
-      <nav className="border-b border-black/5 bg-[#FDFAF5]/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-black/5 bg-[#F5F8FF]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
               <Globe size={16} className="text-white" />
             </div>
             <span className="font-display text-lg font-semibold text-brand-700">
-              Inteligência Viagens
+              AI Mesquita Turismo
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ export default function HomePage() {
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-700 text-xs font-medium px-3 py-1.5 rounded-full mb-6 border border-brand-100">
           <Sparkles size={12} />
-          Powered by Claude AI + SerpApi
+          Powered by Mesquita Turismo
         </div>
 
         <h1 className="font-display text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
@@ -173,7 +173,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 relative">
             {[
               { step: '01', title: 'Conta o que quer', desc: 'Diga o destino, datas, quantas pessoas e preferências no chat.' },
-              { step: '02', title: 'IA busca em tempo real', desc: 'Voos, hotéis e atividades são consultados automaticamente via SerpApi.' },
+              { step: '02', title: 'IA busca em tempo real', desc: 'Voos, hotéis e atividades são consultados automaticamente.' },
               { step: '03', title: 'Recebe o pacote pronto', desc: 'A IA monta e apresenta o itinerário completo que você pode salvar ou exportar em PDF.' },
             ].map((s, i) => (
               <div key={i} className="flex flex-col items-center text-center">
@@ -211,11 +211,11 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-sm text-gray-400">
           <div className="flex items-center gap-2">
             <Globe size={14} className="text-brand-400" />
-            <span>Inteligência Viagens</span>
+            <span>AI Mesquita Turismo</span>
           </div>
           <div className="flex items-center gap-1 text-xs">
             <Clock size={12} />
-            <span>Dados em tempo real via SerpApi</span>
+            <span>Dados em tempo real</span>
           </div>
         </div>
       </footer>

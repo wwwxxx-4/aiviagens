@@ -4,16 +4,16 @@ import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Inteligência Viagens',
-    template: '%s | Inteligência Viagens',
+    default: 'AI Mesquita Turismo',
+    template: '%s | AI Mesquita Turismo',
   },
-  description: 'Planeje sua viagem perfeita com inteligência artificial. Voos, hotéis e atividades em tempo real.',
-  keywords: ['viagens', 'turismo', 'voos', 'hotéis', 'inteligência artificial', 'planejamento de viagem'],
-  authors: [{ name: 'Inteligência Viagens' }],
+  description: 'Planeje sua viagem perfeita com a Mesquita Turismo. Voos, hotéis e atividades em tempo real.',
+  keywords: ['viagens', 'turismo', 'voos', 'hotéis', 'inteligência artificial', 'Mesquita Turismo'],
+  authors: [{ name: 'Mesquita Turismo' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   openGraph: {
-    title: 'Inteligência Viagens',
-    description: 'Planeje sua viagem perfeita com IA',
+    title: 'AI Mesquita Turismo',
+    description: 'Planeje sua viagem perfeita com a Mesquita Turismo',
     type: 'website',
     locale: 'pt_BR',
   },
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0F9E64',
+  themeColor: '#0066FF',
 }
 
 export default function RootLayout({
@@ -50,7 +50,7 @@ export default function RootLayout({
               padding: '12px 16px',
             },
             success: {
-              iconTheme: { primary: '#0F9E64', secondary: '#FDFAF5' },
+              iconTheme: { primary: '#0066FF', secondary: '#FDFAF5' },
             },
           }}
         />

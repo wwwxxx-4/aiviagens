@@ -95,7 +95,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
             {/* Flight results */}
             {message.flights && message.flights.length > 0 && (
-              <FlightResults flights={message.flights} />
+              <FlightResults flights={message.flights} adults={message.flight_adults} />
             )}
 
             {/* Hotel results */}

@@ -44,7 +44,7 @@ export default function ChatLayoutClient({ conversations: initial, children }: C
           <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
             <Globe size={14} className="text-white" />
           </div>
-          <span className="font-display text-sm font-semibold text-brand-700">Inteligência Viagens</span>
+          <span className="font-display text-sm font-semibold text-brand-700">AI Mesquita Turismo</span>
         </Link>
         <Link href="/chat/new"
           onClick={() => setSidebarOpen(false)}
@@ -113,7 +113,7 @@ export default function ChatLayoutClient({ conversations: initial, children }: C
   )
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FDFAF5]">
+    <div className="flex h-screen overflow-hidden bg-[#F5F8FF]">
 
       {/* ─── Hamburger (mobile only) ───────────────────────── */}
       <button

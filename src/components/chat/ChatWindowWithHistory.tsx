@@ -82,7 +82,7 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#FDFAF5]">
+    <div className="flex flex-col h-screen bg-[#F5F8FF]">
       <div className="flex items-center justify-between px-6 py-3 border-b border-black/5 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
@@ -108,7 +108,7 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
 
       <div className="px-6 py-4 border-t border-black/5 bg-white">
         <div className={cn(
-          'flex items-end gap-3 bg-[#FDFAF5] rounded-2xl border transition-all',
+          'flex items-end gap-3 bg-[#F5F8FF] rounded-2xl border transition-all',
           'border-black/8 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100'
         )}>
           <textarea

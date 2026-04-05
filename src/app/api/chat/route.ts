@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
                     })
                     result = { flights, count: flights.length }
                     toolResultsMetadata.flights = flights
-                    send({ type: 'flights_found', flights })
+                    send({ type: 'flights_found', flights, adults: (inp.adults as number) || 1 })
                     break
                   case 'search_hotels':
                     const hotels = await searchHotels({
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
                     })
                     result = { hotels, count: hotels.length }
                     toolResultsMetadata.hotels = hotels
-                    send({ type: 'hotels_found', hotels })
+                    send({ type: 'hotels_found', hotels, check_in: inp.check_in as string, check_out: inp.check_out as string })
                     break
                   case 'search_activities':
                     const activities = await searchActivities(inp.destination as string, inp.category as string)
