@@ -45,10 +45,25 @@ export async function GET(request: NextRequest) {
   const generated = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
   const isCombined = pkgs.length > 1
 
+  // ─── Agency settings from env ───────────────────────────────────
+  const agencyName  = process.env.NEXT_PUBLIC_AGENCY_NAME  || 'Mesquita Turismo'
+  const agencyPhone = process.env.NEXT_PUBLIC_AGENCY_PHONE || '(11) 95396-7095'
+  const agencyEmail = process.env.NEXT_PUBLIC_AGENCY_EMAIL || 'contato@mesquitaturismo.com.br'
+  const agencyWa    = process.env.NEXT_PUBLIC_WHATSAPP     || '5511953967095'
+
   // ─── Build combined totals ───────────────────────────────────────
   const combinedTotal = pkgs.reduce((sum, p) => sum + (Number(p.total_price) || 0), 0)
+
+  // ─── Smart combined title ────────────────────────────────────────
+  // Detect what content is in the selected packages
+  const allFlights    = pkgs.some(p => { const fd = (p.flight_data as Record<string,unknown>); return (fd?.flights as unknown[])?.length > 0 || Array.isArray(p.flight_data) && (p.flight_data as unknown[]).length > 0 })
+  const allHotels     = pkgs.some(p => { const hd = (p.hotel_data as Record<string,unknown>); return (hd?.hotels as unknown[])?.length > 0 || Array.isArray(p.hotel_data) && (p.hotel_data as unknown[]).length > 0 })
+  const allActivities = pkgs.some(p => Array.isArray(p.activities_data) && (p.activities_data as unknown[]).length > 0)
+  const contentParts  = [allFlights && 'Voos', allHotels && 'Hotel', allActivities && 'Atividades'].filter(Boolean).join(' + ')
+
+  const uniqueDests = Array.from(new Set(pkgs.map(p => p.destination as string))).join(', ')
   const combinedTitle = isCombined
-    ? `Orçamento Combinado — ${pkgs.map(p => p.destination as string).join(', ')}`
+    ? `Orçamento: ${uniqueDests}${contentParts ? ` — ${contentParts}` : ''}`
     : String(pkgs[0].title || '')
 
   // ─── First package data for header ─────────────────────────────
@@ -58,7 +73,9 @@ export async function GET(request: NextRequest) {
   const hotelThumb = (firstHotels[0] as Record<string,unknown>)?.thumbnail as string || ''
 
   const versionMatch = String(firstPkg.title || '').match(/\(v(\d+)\)$/)
-  const versionLabel = isCombined ? 'Orçamento Combinado' : (versionMatch ? `Versão ${versionMatch[1]}` : 'Orçamento')
+  const versionLabel = isCombined
+    ? (contentParts ? `Orçamento: ${contentParts}` : 'Orçamento Combinado')
+    : (versionMatch ? `Versão ${versionMatch[1]}` : 'Orçamento')
 
   // ─── Package sections HTML ──────────────────────────────────────
   function renderPkg(pkg: Record<string, unknown>): string {
@@ -309,6 +326,9 @@ export async function GET(request: NextRequest) {
   .footer{margin-top:40px;padding:20px 48px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#9ca3af;background:#fafafa}
   .footer-brand{color:#0066FF;font-weight:700;font-size:11px}
 
+  /* ── AGENCY LOGO ── */
+  #agency-logo{display:none;height:44px;width:auto;object-fit:contain;max-width:180px;border-radius:6px;filter:brightness(0) invert(1);margin-bottom:10px}
+
   /* ── PRINT ── */
   @media print{
     body{background:#fff}
@@ -328,8 +348,9 @@ export async function GET(request: NextRequest) {
     <div class="header-bg"></div>
     ${hotelThumb ? `<img class="header-img" src="${hotelThumb}" alt="destino" onerror="this.style.display='none'" />` : ''}
     <div class="header-content">
-      <div class="header-badge">✈ ${versionLabel} · Mesquita Turismo</div>
-      <div class="agency-name">Mesquita Turismo · mesquitaturismo.com.br</div>
+      <img id="agency-logo" src="" alt="${agencyName}" />
+      <div class="header-badge">✈ ${versionLabel} · ${agencyName}</div>
+      <div class="agency-name">${agencyName} · mesquitaturismo.com.br</div>
       <h1>${combinedTitle}</h1>
       <div class="destination">${pkgs.map(p => `${p.destination as string}${p.destination_country ? ', ' + p.destination_country : ''}`).join(' + ')}</div>
       <div class="header-meta">
@@ -370,16 +391,36 @@ export async function GET(request: NextRequest) {
 
   <!-- FOOTER -->
   <div class="footer">
-    <div>Emitido em ${generated} · ${profile?.email || ''}</div>
-    <div>
-      <div class="footer-brand">Mesquita Turismo</div>
-      <div style="margin-top:1px">mesquitaturismo.com.br · comprarviagem.com.br/mesquitaturismo</div>
+    <div>Emitido em ${generated} · Para: ${profile?.full_name || 'Cliente'}${profile?.email ? ` (${profile.email})` : ''}</div>
+    <div style="text-align:right">
+      <div class="footer-brand">${agencyName}</div>
+      ${agencyPhone ? `<div style="margin-top:2px">${agencyPhone}${agencyEmail ? ` · ${agencyEmail}` : ''}</div>` : ''}
+      <div style="margin-top:1px">mesquitaturismo.com.br</div>
     </div>
   </div>
 
 </div>
 <script>
   window.onload = function() {
+    // ── Inject agency logo from localStorage ──
+    try {
+      var s = JSON.parse(localStorage.getItem('iv_agency_settings') || '{}');
+      if (s.logoUrl) {
+        var el = document.getElementById('agency-logo');
+        if (el) {
+          el.src = s.logoUrl;
+          el.style.display = 'block';
+          // If logo is dark, don't invert; otherwise keep white filter for dark header
+          el.style.filter = 'brightness(0) invert(1)';
+        }
+      }
+      // Override agency name/phone/email if set in localStorage
+      if (s.agencyName) {
+        document.querySelectorAll('.footer-brand').forEach(function(el){ el.textContent = s.agencyName; });
+      }
+    } catch(e) {}
+
+    // ── Print button ──
     var btn = document.createElement('button');
     btn.textContent = '🖨️ Imprimir / Salvar PDF';
     btn.style = 'position:fixed;bottom:20px;right:20px;background:#0066FF;color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,102,255,.4);z-index:999;font-family:Plus Jakarta Sans,sans-serif';

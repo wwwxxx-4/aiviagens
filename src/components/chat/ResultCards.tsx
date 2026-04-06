@@ -17,7 +17,7 @@ function calcNights(checkIn?: string, checkOut?: string): number | null {
 
 // ─── Hotel Card ────────────────────────────────────────────────────────────────
 
-export function HotelCard({ hotel, nights: nightsProp }: { hotel: HotelResult; nights?: number }) {
+export function HotelCard({ hotel, nights: nightsProp, adults = 1, children = 0 }: { hotel: HotelResult; nights?: number; adults?: number; children?: number }) {
   const cfg = getAgencySettings()
   const displayPricePerNight = applyMarkup(hotel.price_per_night, 'hotels')
   const nights = nightsProp ?? calcNights(hotel.check_in, hotel.check_out) ?? 1
@@ -59,6 +59,15 @@ export function HotelCard({ hotel, nights: nightsProp }: { hotel: HotelResult; n
             {hotel.amenities.slice(0, 3).map((a, i) => (
               <span key={i} className="text-xs bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100">{a}</span>
             ))}
+          </div>
+        )}
+
+        {/* Passengers + nights */}
+        {(adults > 0 || children > 0) && (
+          <div className="flex items-center gap-1 text-xs text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5 mb-2 border border-brand-100">
+            <span>👥</span>
+            <span className="font-medium">{adults} adulto{adults !== 1 ? 's' : ''}{children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}</span>
+            {nights && nights > 1 && <span className="text-gray-400 ml-1">· {nights} noites</span>}
           </div>
         )}
 
@@ -106,7 +115,7 @@ export function HotelCard({ hotel, nights: nightsProp }: { hotel: HotelResult; n
   )
 }
 
-export function HotelResults({ hotels, checkIn, checkOut }: { hotels: HotelResult[]; checkIn?: string; checkOut?: string }) {
+export function HotelResults({ hotels, checkIn, checkOut, adults, children }: { hotels: HotelResult[]; checkIn?: string; checkOut?: string; adults?: number; children?: number }) {
   const nights = calcNights(checkIn, checkOut) ?? undefined
   return (
     <div className="mt-3">
@@ -114,7 +123,7 @@ export function HotelResults({ hotels, checkIn, checkOut }: { hotels: HotelResul
         🏨 {hotels.length} hotéis encontrados{nights ? ` · ${nights} noites` : ''}
       </p>
       <div className="grid grid-cols-2 gap-2">
-        {hotels.slice(0, 4).map(h => <HotelCard key={h.id} hotel={h} nights={nights} />)}
+        {hotels.slice(0, 4).map(h => <HotelCard key={h.id} hotel={h} nights={nights} adults={adults} children={children} />)}
       </div>
     </div>
   )

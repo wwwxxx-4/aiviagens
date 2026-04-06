@@ -162,7 +162,12 @@ export function filterPackages(
 
 // Formata pacotes para o agente apresentar
 export function formatPackagesForAgent(packages: AgencyPackage[]): string {
-  if (packages.length === 0) return 'Nenhum pacote encontrado com esses critérios.'
+  if (packages.length === 0) return `ZERO pacotes exclusivos da agência encontrados para esse destino/critério.
+
+AÇÃO OBRIGATÓRIA:
+1. Informe o cliente que não há pacotes exclusivos, mas sugira www.aviagemteencontra.com.br
+2. Se já tiver origem + destino + datas → chame AGORA search_flights E search_hotels
+3. Se faltar informação → peça ao usuário (destino, origem, datas) de forma direta`
 
   const markup = Number(process.env.NEXT_PUBLIC_MARKUP_FLIGHTS || '0')
 

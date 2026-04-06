@@ -12,9 +12,12 @@ export interface ChatMessage {
   agency_packages?: unknown[]
   flights?: FlightResult[]
   flight_adults?: number
+  flight_children?: number
   hotels?: HotelResult[]
   hotel_check_in?: string
   hotel_check_out?: string
+  hotel_adults?: number
+  hotel_children?: number
   activities?: ActivityResult[]
   weather?: unknown
   tools_running?: string[]
@@ -109,10 +112,10 @@ export function useChat(initialConversationId?: string): UseChatReturn {
               updateLast(m => ({ ...m, agency_packages: event.packages }))
               break
             case 'flights_found':
-                updateLast(m => ({ ...m, flights: event.flights, flight_adults: event.adults, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_flights') }))
+                updateLast(m => ({ ...m, flights: event.flights, flight_adults: event.adults, flight_children: event.children, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_flights') }))
                 break
               case 'hotels_found':
-                updateLast(m => ({ ...m, hotels: event.hotels, hotel_check_in: event.check_in, hotel_check_out: event.check_out, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_hotels') }))
+                updateLast(m => ({ ...m, hotels: event.hotels, hotel_check_in: event.check_in, hotel_check_out: event.check_out, hotel_adults: event.adults, hotel_children: event.children, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_hotels') }))
                 break
               case 'activities_found':
                 updateLast(m => ({ ...m, activities: event.activities, tools_running: (m.tools_running || []).filter((t: string) => t !== 'search_activities') }))

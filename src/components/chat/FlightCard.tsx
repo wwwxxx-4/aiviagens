@@ -28,11 +28,12 @@ function getTime(datetime?: string) {
   return parts[parts.length - 1].slice(0, 5)
 }
 
-export function FlightCard({ flight, adults = 1 }: { flight: FlightResult; adults?: number }) {
+export function FlightCard({ flight, adults = 1, children = 0 }: { flight: FlightResult; adults?: number; children?: number }) {
   const f = flight as FlightWithReturn
   const hasReturn = !!f.return_flight
   const displayPrice = applyMarkup(flight.price)
   const totalPrice = displayPrice * Math.max(adults, 1)
+  const paxLabel = `${adults} adulto${adults !== 1 ? 's' : ''}${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`
   const [saved, setSaved] = useState(false)
   const { saving, saveFlight } = useSaveToPackage()
   const isSaving = saving === flight.id
@@ -99,7 +100,13 @@ export function FlightCard({ flight, adults = 1 }: { flight: FlightResult; adult
 
       {/* Price + CTAs */}
       <div className="px-3 pb-3 pt-1">
-        <div className="bg-brand-50 rounded-lg px-2.5 py-2 mb-1.5">
+        {/* Passengers */}
+        <div className="flex items-center gap-1 text-xs text-brand-700 bg-brand-50 rounded-lg px-2.5 py-1.5 mb-1.5 border border-brand-100">
+          <span>👥</span>
+          <span className="font-medium">{paxLabel}</span>
+          <span className="text-gray-400 ml-1">· {hasReturn ? 'ida e volta' : 'só ida'}</span>
+        </div>
+        <div className="bg-gray-50 rounded-lg px-2.5 py-2 mb-1.5 border border-gray-100">
           <div className="flex items-baseline gap-1 flex-wrap">
             {adults > 1 ? (
               <>
@@ -110,7 +117,7 @@ export function FlightCard({ flight, adults = 1 }: { flight: FlightResult; adult
             ) : (
               <>
                 <span className="text-base font-bold text-brand-600">{formatCurrency(displayPrice, flight.currency)}</span>
-                <span className="text-xs text-gray-400">{hasReturn ? 'ida e volta' : 'só ida'} / pessoa</span>
+                <span className="text-xs text-gray-400">/ pessoa</span>
               </>
             )}
           </div>
@@ -210,7 +217,7 @@ function FlightLeg({ label, airline, logo, origin, destination, depTime, arrTime
   )
 }
 
-export function FlightResults({ flights, adults }: { flights: FlightResult[]; adults?: number }) {
+export function FlightResults({ flights, adults, children }: { flights: FlightResult[]; adults?: number; children?: number }) {
   return (
     <div className="mt-3">
       <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
@@ -218,7 +225,7 @@ export function FlightResults({ flights, adults }: { flights: FlightResult[]; ad
       </p>
       <div className="space-y-2">
         {flights.slice(0, 4).map(f => (
-          <FlightCard key={f.id} flight={f} adults={adults} />
+          <FlightCard key={f.id} flight={f} adults={adults} children={children} />
         ))}
       </div>
     </div>
