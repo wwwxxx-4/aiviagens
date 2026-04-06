@@ -30,7 +30,7 @@ export function HotelCard({ hotel, nights: nightsProp, adults = 1, children = 0 
   const isSaving = saving === hotel.id
 
   async function handleSave() {
-    const id = await saveHotel(hotel, 1, nights)
+    const id = await saveHotel(hotel, adults, nights, children)
     if (id) setSaved(true)
   }
 

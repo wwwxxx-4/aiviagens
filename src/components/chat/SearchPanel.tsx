@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { X, Plane, Hotel, ChevronDown, ChevronUp, Plus, Minus, Search, Users, Calendar, MapPin } from 'lucide-react'
+import { X, ChevronDown, ChevronUp, Plus, Minus, Search, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AirportInput } from './AirportInput'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Tab = 'flights' | 'hotels' | 'both'
@@ -123,7 +124,7 @@ function ChildrenAges({ children, onChange }: { children: Child[]; onChange: (c:
             }}
             className="flex-1 text-xs text-gray-800 bg-transparent focus:outline-none font-semibold"
           >
-            {Array.from({ length: 18 }, (_, a) => (
+            {Array.from({ length: 12 }, (_, a) => (
               <option key={a} value={a}>{a === 0 ? 'Menos de 1 ano' : `${a} ano${a !== 1 ? 's' : ''}`}</option>
             ))}
           </select>
@@ -185,7 +186,7 @@ function PassengersSection({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
-  const [tab, setTab] = useState<Tab>('both')
+  const [tab, setTab] = useState<Tab>('flights')
   const [showPassengers, setShowPassengers] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
 
@@ -200,6 +201,10 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
     adults: 2, children: [],
     stars: '', freeCancellation: false, maxPrice: '',
   })
+
+  // labels stored separately for display in "both" mode hotel sync
+  const [flightOriginLabel, setFlightOriginLabel] = useState('')
+  const [flightDestLabel, setFlightDestLabel] = useState('')
 
   // sync adults/children between tabs
   function setFlightField<K extends keyof FlightForm>(k: K, v: FlightForm[K]) {
@@ -294,9 +299,9 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
       {/* ── Tabs ── */}
       <div className="flex gap-1 px-5 pt-3">
         {([
-          { id: 'both', icon: '✈️🏨', label: 'Voos + Hotel' },
           { id: 'flights', icon: '✈️', label: 'Só Voos' },
           { id: 'hotels', icon: '🏨', label: 'Só Hotel' },
+          { id: 'both', icon: '✈️🏨', label: 'Voos + Hotel' },
         ] as { id: Tab; icon: string; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={cn(
@@ -338,27 +343,19 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel>📍 Origem</FieldLabel>
-                <div className="relative">
-                  <MapPin size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <FieldInput
-                    placeholder="São Paulo, GRU"
-                    value={flight.origin}
-                    onChange={e => setFlightField('origin', e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
+                <AirportInput
+                  placeholder="São Paulo, GRU..."
+                  value={flight.origin}
+                  onChange={(iata, label) => setFlightField('origin', iata || label)}
+                />
               </div>
               <div>
                 <FieldLabel>📍 Destino</FieldLabel>
-                <div className="relative">
-                  <MapPin size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                  <FieldInput
-                    placeholder="Fortaleza, FOR"
-                    value={flight.destination}
-                    onChange={e => setFlightField('destination', e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
+                <AirportInput
+                  placeholder="Fortaleza, FOR..."
+                  value={flight.destination}
+                  onChange={(iata, label) => setFlightField('destination', iata || label)}
+                />
               </div>
             </div>
 
@@ -384,14 +381,11 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
           <div className="space-y-3">
             <div>
               <FieldLabel>📍 Destino / Cidade</FieldLabel>
-              <div className="relative">
-                <MapPin size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-                <FieldInput placeholder="Fortaleza, Rio de Janeiro..."
-                  value={hotel.destination}
-                  onChange={e => setHotelField('destination', e.target.value)}
-                  className="pl-8"
-                />
-              </div>
+              <AirportInput
+                placeholder="Fortaleza, Rio de Janeiro..."
+                value={hotel.destination}
+                onChange={(iata, label) => setHotelField('destination', label || iata)}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

@@ -12,7 +12,7 @@ type FlightWithReturn = FlightResult & {
 export function useSaveToPackage() {
   const [saving, setSaving] = useState<string | null>(null)
 
-  async function saveFlight(flight: FlightResult, adults = 1): Promise<string | null> {
+  async function saveFlight(flight: FlightResult, adults = 1, children = 0): Promise<string | null> {
     setSaving(flight.id)
     try {
       const supabase = createClient()
@@ -32,8 +32,8 @@ export function useSaveToPackage() {
         check_in: checkIn,
         check_out: checkOut,
         adults,
-        children: 0,
-        total_price: flight.price,
+        children,
+        total_price: flight.price * adults,
         currency: flight.currency || 'BRL',
         flight_data: { flights: [flight] },
         hotel_data: {},
@@ -52,7 +52,7 @@ export function useSaveToPackage() {
     }
   }
 
-  async function saveHotel(hotel: HotelResult, adults = 1, nights = 1): Promise<string | null> {
+  async function saveHotel(hotel: HotelResult, adults = 1, nights = 1, children = 0): Promise<string | null> {
     setSaving(hotel.id)
     try {
       const supabase = createClient()
@@ -69,7 +69,7 @@ export function useSaveToPackage() {
         check_in: hotel.check_in || today,
         check_out: hotel.check_out || futureDate,
         adults,
-        children: 0,
+        children,
         total_price: hotel.price_per_night * nights,
         currency: hotel.currency || 'BRL',
         flight_data: {},

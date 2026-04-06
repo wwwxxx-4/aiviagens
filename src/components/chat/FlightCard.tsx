@@ -59,7 +59,7 @@ export function FlightCard({ flight, adults = 1, children = 0 }: { flight: Fligh
   const waUrl = generateWhatsAppUrl(waMessage)
 
   async function handleSave() {
-    const id = await saveFlight(flight)
+    const id = await saveFlight(flight, adults, children)
     if (id) setSaved(true)
   }
 
