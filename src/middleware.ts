@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PROTECTED_ROUTES = ['/dashboard', '/chat', '/package']
 
 // Rotas apenas para visitantes (não logados)
+// Nota: /auth/reset-password NÃO está aqui — usuário já está logado via link do email
 const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password']
 
 export async function middleware(request: NextRequest) {
