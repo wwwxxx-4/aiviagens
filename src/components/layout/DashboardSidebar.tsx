@@ -9,23 +9,35 @@ import { cn } from '@/lib/utils'
 import type { UserProfile } from '@/types'
 import toast from 'react-hot-toast'
 
+// Email do administrador — único com acesso às Configurações
+const ADMIN_EMAIL = 'westermesquita@gmail.com'
+
 interface DashboardSidebarProps {
   profile: UserProfile | null
+  userEmail?: string | null
 }
 
-const navItems = [
+const baseNavItems = [
   { href: '/dashboard', label: 'Início', icon: Globe, exact: true },
   { href: '/chat', label: 'Chat IA', icon: MessageSquare },
   { href: '/dashboard/packages', label: 'Minhas viagens', icon: Briefcase },
   { href: '/dashboard/profile', label: 'Perfil', icon: User },
+]
+
+const adminNavItems = [
   { href: '/dashboard/settings', label: 'Configurações', icon: Settings },
 ]
 
-export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
+export default function DashboardSidebar({ profile, userEmail }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const [open, setOpen] = useState(false)
+
+  const isAdmin = userEmail === ADMIN_EMAIL || profile?.email === ADMIN_EMAIL
+
+  // Monta lista de itens de acordo com permissão
+  const navItems = isAdmin ? [...baseNavItems, ...adminNavItems] : baseNavItems
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -36,7 +48,7 @@ export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
 
   const initials = profile?.full_name
     ? profile.full_name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-    : profile?.email?.[0]?.toUpperCase() ?? 'U'
+    : (userEmail?.[0] ?? profile?.email?.[0] ?? 'U').toUpperCase()
 
   return (
     <>
@@ -60,10 +72,8 @@ export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
       {/* ─── Sidebar ────────────────────────────────────────── */}
       <aside className={cn(
         'w-60 bg-white border-r border-black/5 flex flex-col shrink-0 z-50 transition-transform duration-300 ease-in-out',
-        // Mobile: fixed, slide in/out
         'fixed inset-y-0 left-0',
         open ? 'translate-x-0 shadow-2xl' : '-translate-x-full',
-        // Desktop: always visible, in flow
         'md:relative md:inset-auto md:translate-x-0 md:shadow-none'
       )}>
 
@@ -126,6 +136,15 @@ export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
               )
             })}
           </ul>
+
+          {/* Badge admin */}
+          {isAdmin && (
+            <div className="mt-4 px-3">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 text-brand-600 text-xs font-medium">
+                ⚙ Admin
+              </span>
+            </div>
+          )}
         </nav>
 
         {/* User */}
@@ -138,7 +157,7 @@ export default function DashboardSidebar({ profile }: DashboardSidebarProps) {
               <p className="text-sm font-medium text-gray-900 truncate">
                 {profile?.full_name || 'Usuário'}
               </p>
-              <p className="text-xs text-gray-400 truncate">{profile?.email}</p>
+              <p className="text-xs text-gray-400 truncate">{userEmail || profile?.email}</p>
             </div>
           </div>
           <button
