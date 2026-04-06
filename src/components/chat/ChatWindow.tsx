@@ -114,15 +114,16 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
           {/* Search toggle button */}
           <button
             onClick={() => setShowSearch(s => !s)}
-            title="Busca rápida"
+            title="Buscar voos e hotéis"
             className={cn(
-              'w-9 h-9 rounded-xl flex items-center justify-center mb-1.5 ml-1.5 transition-all flex-shrink-0',
+              'flex items-center gap-1.5 px-3 h-9 rounded-xl mb-1.5 ml-1.5 transition-all flex-shrink-0 text-xs font-semibold whitespace-nowrap',
               showSearch
-                ? 'bg-brand-500 text-white'
-                : 'bg-gray-100 text-gray-400 hover:bg-brand-50 hover:text-brand-500'
+                ? 'bg-brand-500 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-brand-50 hover:text-brand-600'
             )}
           >
-            <SlidersHorizontal size={14} />
+            <SlidersHorizontal size={13} />
+            <span className="hidden sm:inline">Buscar</span>
           </button>
           <textarea
             ref={inputRef}
@@ -152,7 +153,7 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
           </button>
         </div>
         <p className="text-xs text-gray-300 text-right mt-2">
-          <span className="inline-flex items-center gap-1"><SlidersHorizontal size={9} /> Busca rápida</span>
+          <span className="inline-flex items-center gap-1"><SlidersHorizontal size={9} /> Clique em "Buscar" para pesquisar voos e hotéis</span>
           {' · '}Enter para enviar
         </p>
       </div>
