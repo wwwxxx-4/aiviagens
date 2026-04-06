@@ -25,7 +25,7 @@ const baseNavItems = [
 ]
 
 const adminNavItems = [
-  { href: '/dashboard/settings', label: 'Configurações', icon: Settings },
+  { href: '/dashboard/settings', label: 'Configurações', icon: Settings, exact: false },
 ]
 
 export default function DashboardSidebar({ profile, userEmail }: DashboardSidebarProps) {
