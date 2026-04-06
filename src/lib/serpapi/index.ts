@@ -168,14 +168,22 @@ export async function searchHotels(params: SearchHotelsParams): Promise<HotelRes
     check_in_date: params.check_in, check_out_date: params.check_out,
     currency: params.currency || 'BRL', hl: 'pt', gl: 'br',
     adults: String(params.adults || 1),
+    sort_by: '13',       // 13 = Most reviewed (mais avaliados)
   })
   if (params.children) query.set('children', String(params.children))
+  if (params.children_ages) query.set('children_ages', params.children_ages)
 
   const res = await fetch(`${SERP_BASE}?${query}`)
   const json: SerpApiHotelsResponse = await res.json()
   if (json.error) throw new Error(`SerpApi hotels error: ${json.error}`)
 
-  const results: HotelResult[] = (json.properties || []).slice(0, 6).map((h, i) => {
+  // Filtrar apenas 3+ estrelas, ordenado por mais avaliados
+  const filteredProperties = (json.properties || []).filter(h => {
+    const stars = h.extracted_hotel_class || 0
+    return stars === 0 || stars >= 3  // 0 = sem classificação, incluir; >= 3 = válido
+  })
+
+  const results: HotelResult[] = filteredProperties.slice(0, 6).map((h, i) => {
     const raw = h as unknown as Record<string, unknown>
     // Try to get best image: images array > thumbnail
     const images = raw.images as Array<{ thumbnail?: string; original_image?: string }> | undefined

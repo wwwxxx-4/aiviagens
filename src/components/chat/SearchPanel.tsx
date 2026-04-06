@@ -232,6 +232,13 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
     return s
   }, [tab, flight, hotel])
 
+  // Converte YYYY-MM-DD → DD/MM/YYYY
+  function dateBR(iso: string): string {
+    if (!iso) return ''
+    const [y, m, d] = iso.split('-')
+    return `${d}/${m}/${y}`
+  }
+
   function buildMessage(): string {
     const parts: string[] = []
 
@@ -246,7 +253,7 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
       const cls = CABIN_LABELS[f.cabinClass] !== 'Econômica' ? `, classe ${CABIN_LABELS[f.cabinClass]}` : ''
       const stops = f.stops === '0' ? ', voo direto' : f.stops === '1' ? ', até 1 parada' : ''
       const price = f.maxPrice ? `, preço máximo R$${f.maxPrice}` : ''
-      parts.push(`Buscar voos de ${orig} para ${dest}, ${tipo}, saída ${f.departDate}${f.flightType === 'roundtrip' ? `, retorno ${f.returnDate}` : ''}, ${pax}${cls}${stops}${price}`)
+      parts.push(`Buscar voos de ${orig} para ${dest}, ${tipo}, saída ${dateBR(f.departDate)}${f.flightType === 'roundtrip' ? `, retorno ${dateBR(f.returnDate)}` : ''}, ${pax}${cls}${stops}${price}`)
     }
 
     if (tab === 'hotels' || tab === 'both') {
@@ -258,7 +265,7 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
       const stars = h.stars ? `, ${h.stars} estrelas` : ''
       const cancel = h.freeCancellation ? ', com cancelamento gratuito' : ''
       const price = h.maxPrice ? `, preço máximo R$${h.maxPrice}/noite` : ''
-      parts.push(`Buscar hotéis em ${dest}, check-in ${h.checkIn}, check-out ${h.checkOut}, ${pax}${stars}${cancel}${price}`)
+      parts.push(`Buscar hotéis em ${dest}, check-in ${dateBR(h.checkIn)}, check-out ${dateBR(h.checkOut)}, ${pax}${stars}${cancel}${price}`)
     }
 
     return parts.join('. ') + '.'

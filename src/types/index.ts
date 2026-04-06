@@ -246,5 +246,6 @@ export interface SearchHotelsParams {
   check_out: string
   adults?: number
   children?: number
+  children_ages?: string
   currency?: string
 }

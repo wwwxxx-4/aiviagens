@@ -31,8 +31,10 @@ function getTime(datetime?: string) {
 export function FlightCard({ flight, adults = 1, children = 0 }: { flight: FlightResult; adults?: number; children?: number }) {
   const f = flight as FlightWithReturn
   const hasReturn = !!f.return_flight
-  const displayPrice = applyMarkup(flight.price)
-  const totalPrice = displayPrice * Math.max(adults, 1)
+  // SerpApi já retorna o preço TOTAL para todos os passageiros pesquisados
+  const totalPrice = applyMarkup(flight.price)
+  const perPersonPrice = adults > 1 ? Math.round(totalPrice / adults) : totalPrice
+  const displayPrice = totalPrice  // alias para compatibilidade
   const paxLabel = `${adults} adulto${adults !== 1 ? 's' : ''}${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`
   const [saved, setSaved] = useState(false)
   const { saving, saveFlight } = useSaveToPackage()
@@ -108,17 +110,10 @@ export function FlightCard({ flight, adults = 1, children = 0 }: { flight: Fligh
         </div>
         <div className="bg-gray-50 rounded-lg px-2.5 py-2 mb-1.5 border border-gray-100">
           <div className="flex items-baseline gap-1 flex-wrap">
-            {adults > 1 ? (
-              <>
-                <span className="text-base font-bold text-brand-600">{formatCurrency(totalPrice, flight.currency)}</span>
-                <span className="text-xs text-gray-500">total</span>
-                <span className="text-xs text-gray-400">({formatCurrency(displayPrice, flight.currency)}/pessoa × {adults})</span>
-              </>
-            ) : (
-              <>
-                <span className="text-base font-bold text-brand-600">{formatCurrency(displayPrice, flight.currency)}</span>
-                <span className="text-xs text-gray-400">/ pessoa</span>
-              </>
+            <span className="text-base font-bold text-brand-600">{formatCurrency(totalPrice, flight.currency)}</span>
+            <span className="text-xs text-gray-500">total</span>
+            {adults > 1 && (
+              <span className="text-xs text-gray-400">({formatCurrency(perPersonPrice, flight.currency)}/pessoa × {adults})</span>
             )}
           </div>
         </div>

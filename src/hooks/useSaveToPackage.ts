@@ -33,7 +33,7 @@ export function useSaveToPackage() {
         check_out: checkOut,
         adults,
         children,
-        total_price: flight.price * adults,
+        total_price: flight.price, // SerpApi já retorna total para todos os passageiros
         currency: flight.currency || 'BRL',
         flight_data: { flights: [flight] },
         hotel_data: {},

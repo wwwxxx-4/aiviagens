@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Star, MapPin, MessageCircle, ExternalLink, Bookmark, Check, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { applyMarkup, generateHotelBookingUrl, generateActivitiesUrl, generateWhatsAppUrl, getAgencySettings } from '@/lib/booking'
+import { applyMarkup, generateActivitiesUrl, generateWhatsAppUrl, getAgencySettings } from '@/lib/booking'
 import { useSaveToPackage } from '@/hooks/useSaveToPackage'
 import type { HotelResult, ActivityResult } from '@/types'
 
@@ -22,8 +22,9 @@ export function HotelCard({ hotel, nights: nightsProp, adults = 1, children = 0 
   const displayPricePerNight = applyMarkup(hotel.price_per_night, 'hotels')
   const nights = nightsProp ?? calcNights(hotel.check_in, hotel.check_out) ?? 1
   const totalPrice = displayPricePerNight * nights
-  const bookingUrl = generateHotelBookingUrl()
-  const waMsg = `Olá ${cfg.agencyName}! Tenho interesse no hotel:\n🏨 ${hotel.name}\n💰 ${formatCurrency(displayPricePerNight, hotel.currency)}/noite × ${nights} noites = ${formatCurrency(totalPrice, hotel.currency)}\n\nPoderia me ajudar com a reserva?`
+  const paxStr = `${adults} adulto${adults !== 1 ? 's' : ''}${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`
+  const datesStr = hotel.check_in && hotel.check_out ? `, ${hotel.check_in} a ${hotel.check_out}` : ''
+  const waMsg = `Olá ${cfg.agencyName}! Tenho interesse no hotel:\n🏨 ${hotel.name}\n👥 ${paxStr}${datesStr}\n💰 ${formatCurrency(displayPricePerNight, hotel.currency)}/noite × ${nights} noites = ${formatCurrency(totalPrice, hotel.currency)}\n\nPoderia me ajudar com a reserva?`
 
   const [saved, setSaved] = useState(false)
   const { saving, saveHotel } = useSaveToPackage()
@@ -101,13 +102,10 @@ export function HotelCard({ hotel, nights: nightsProp, adults = 1, children = 0 
             {saved ? <Check size={10} /> : <Bookmark size={10} />}
             {saved ? 'Salvo!' : isSaving ? '...' : 'Salvar'}
           </button>
+          {/* Apenas WhatsApp da agência — sem links externos de reserva */}
           <a href={generateWhatsAppUrl(waMsg)} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors">
-            <MessageCircle size={10} /> WhatsApp
-          </a>
-          <a href={bookingUrl} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors">
-            <ExternalLink size={10} /> Reservar
+            <MessageCircle size={10} /> Reservar via WhatsApp
           </a>
         </div>
       </div>

@@ -9,6 +9,9 @@ export interface Airport {
 
 // ─── Brasil ──────────────────────────────────────────────────────────────────
 const BR: Airport[] = [
+  // Aliases multi-aeroporto (aparecem primeiro na busca)
+  { iata: 'SAO', name: 'Todos os aeroportos (GRU + CGH + VCP)', city: 'São Paulo', state: 'SP', country: 'Brasil', flag: '🇧🇷' },
+  { iata: 'RIO', name: 'Todos os aeroportos (GIG + SDU)', city: 'Rio de Janeiro', state: 'RJ', country: 'Brasil', flag: '🇧🇷' },
   { iata: 'GRU', name: 'Guarulhos Internacional', city: 'São Paulo', state: 'SP', country: 'Brasil', flag: '🇧🇷' },
   { iata: 'CGH', name: 'Congonhas', city: 'São Paulo', state: 'SP', country: 'Brasil', flag: '🇧🇷' },
   { iata: 'VCP', name: 'Viracopos Internacional', city: 'Campinas', state: 'SP', country: 'Brasil', flag: '🇧🇷' },
