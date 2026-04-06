@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Send, Plane, RotateCcw } from 'lucide-react'
+import { Send, Plane, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { useChat, type ChatMessage } from '@/hooks/useChat'
 import { MessageBubble } from './MessageBubble'
+import { SearchPanel } from './SearchPanel'
 import { ProviderSelector } from './ProviderSelector'
 import { cn } from '@/lib/utils'
 import type { ProviderID } from '@/lib/llm/types'
@@ -29,6 +30,7 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
   const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const { messages, isLoading, sendMessage, setInitialMessages } = useChat(conversationId)
   const [input, setInput] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const initialized = useRef(false)
@@ -107,20 +109,45 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
       </div>
 
       <div className="px-6 py-4 border-t border-black/5 bg-white">
+        {/* Search Panel */}
+        {showSearch && (
+          <div className="mb-3 animate-fade-in">
+            <SearchPanel
+              onClose={() => setShowSearch(false)}
+              onSearch={msg => {
+                setShowSearch(false)
+                sendMessage(msg, DEFAULT_PROVIDER, DEFAULT_MODEL)
+              }}
+            />
+          </div>
+        )}
         <div className={cn(
-          'flex items-end gap-3 bg-[#F5F8FF] rounded-2xl border transition-all',
+          'flex items-end gap-2 bg-[#F5F8FF] rounded-2xl border transition-all',
           'border-black/8 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100'
         )}>
+          {/* Search toggle button */}
+          <button
+            onClick={() => setShowSearch(s => !s)}
+            title="Busca rápida"
+            className={cn(
+              'w-9 h-9 rounded-xl flex items-center justify-center mb-1.5 ml-1.5 transition-all flex-shrink-0',
+              showSearch
+                ? 'bg-brand-500 text-white'
+                : 'bg-gray-100 text-gray-400 hover:bg-brand-50 hover:text-brand-500'
+            )}
+          >
+            <SlidersHorizontal size={14} />
+          </button>
           <textarea
             ref={inputRef} value={input}
             onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px' }}
             onKeyDown={handleKeyDown}
             placeholder="Continue a conversa..."
             rows={1} disabled={isLoading}
-            className="flex-1 resize-none bg-transparent px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:opacity-50 max-h-36 leading-relaxed"
+            className="flex-1 resize-none bg-transparent px-2 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:opacity-50 max-h-36 leading-relaxed"
           />
           <button onClick={handleSend} disabled={!input.trim() || isLoading}
-            className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-1.5 mr-1.5 transition-all',
+            className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-1.5 mr-1.5 transition-all flex-shrink-0',
               input.trim() && !isLoading ? 'bg-brand-500 text-white hover:bg-brand-600 active:scale-95' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
             )}>
             <Send size={14} />
