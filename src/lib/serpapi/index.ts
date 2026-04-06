@@ -36,6 +36,17 @@ async function setCache(key: string, data: unknown, type: string, ttlMinutes = 6
   } catch { /* non-critical */ }
 }
 
+// ─── Multi-airport expansion (SerpApi aceita IATA separados por vírgula) ─────
+
+const MULTI_AIRPORT: Record<string, string> = {
+  SAO: 'GRU,CGH,VCP',  // São Paulo — todos os aeroportos
+  RIO: 'SDU,GIG',       // Rio de Janeiro — todos os aeroportos
+}
+
+function expandCode(code: string): string {
+  return MULTI_AIRPORT[code.toUpperCase()] ?? code
+}
+
 // ─── Flights ─────────────────────────────────────────────────────────────────
 
 export async function searchFlights(params: SearchFlightsParams): Promise<FlightResult[]> {
@@ -48,14 +59,15 @@ export async function searchFlights(params: SearchFlightsParams): Promise<Flight
   const query = new URLSearchParams({
     engine: 'google_flights',
     api_key: SERP_KEY,
-    departure_id: params.origin,
-    arrival_id: params.destination,
+    departure_id: expandCode(params.origin),
+    arrival_id: expandCode(params.destination),
     outbound_date: params.outbound_date,
     type: isRoundTrip ? '1' : '2',
     currency: params.currency || 'BRL',
     hl: 'pt', gl: 'br',
     adults: String(params.adults || 1),
   })
+  if (params.children && params.children > 0) query.set('children', String(params.children))
   if (isRoundTrip) query.set('return_date', params.return_date!)
 
   const res = await fetch(`${SERP_BASE}?${query}`)
@@ -119,7 +131,7 @@ export async function searchFlights(params: SearchFlightsParams): Promise<Flight
     try {
       const retQuery = new URLSearchParams({
         engine: 'google_flights', api_key: SERP_KEY,
-        departure_id: params.destination, arrival_id: params.origin,
+        departure_id: expandCode(params.destination), arrival_id: expandCode(params.origin),
         outbound_date: params.return_date, type: '2',
         currency: params.currency || 'BRL', hl: 'pt', gl: 'br',
         adults: String(params.adults || 1),

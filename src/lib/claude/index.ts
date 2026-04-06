@@ -18,6 +18,11 @@ export function getTravelSystemPrompt(): string {
 
 HOJE É: ${todayStr} (${todayISO})
 
+═══ REGRAS DE AEROPORTOS ═══
+- SAO = todos os aeroportos de São Paulo. Ao chamar search_flights com origem/destino São Paulo, passe SEMPRE "SAO" (NÃO converta para GRU, CGH ou VCP — o sistema expande automaticamente)
+- RIO = todos os aeroportos do Rio de Janeiro. Ao chamar search_flights com origem/destino Rio de Janeiro, passe SEMPRE "RIO" (NÃO converta para GIG ou SDU — o sistema expande automaticamente)
+- Para qualquer outra cidade, use o código IATA padrão: GRU, FOR, BSB, SSA, LIS, JFK, etc.
+
 ═══ REGRAS DE DATA ═══
 - NUNCA sugira datas passadas. Sempre futuras a partir de ${todayISO}
 - Formato obrigatório para buscas: YYYY-MM-DD
@@ -122,11 +127,12 @@ export const TRAVEL_TOOLS: Anthropic.Tool[] = [
     input_schema: {
       type: 'object' as const,
       properties: {
-        origin: { type: 'string', description: 'IATA origem. Ex: GRU, CGH, BSB' },
-        destination: { type: 'string', description: 'IATA destino. Ex: LIS, JFK, NRT' },
+        origin: { type: 'string', description: 'Código IATA do aeroporto de origem. Use SEMPRE o código IATA exato informado pelo usuário. Exemplos: GRU, CGH, BSB, FOR, SSA. IMPORTANTE: SAO = todos os aeroportos de São Paulo (GRU+CGH+VCP). RIO = todos os aeroportos do Rio de Janeiro (GIG+SDU). Preserve SAO e RIO como estão — NÃO converta para outro código.' },
+        destination: { type: 'string', description: 'Código IATA do aeroporto de destino. Use SEMPRE o código IATA exato informado pelo usuário. Exemplos: LIS, JFK, NRT, GIG, GRU. IMPORTANTE: SAO = todos os aeroportos de São Paulo. RIO = todos os aeroportos do Rio de Janeiro. Preserve SAO e RIO como estão — NÃO converta para outro código.' },
         outbound_date: { type: 'string', description: 'Data ida YYYY-MM-DD. DEVE ser futura!' },
         return_date: { type: 'string', description: 'Data volta YYYY-MM-DD. Opcional.' },
-        adults: { type: 'number' },
+        adults: { type: 'number', description: 'Número de adultos (padrão: 1)' },
+        children: { type: 'number', description: 'Número de crianças (0–11 anos). Extraia do texto do usuário.' },
         currency: { type: 'string', description: 'BRL, USD, EUR (padrão: BRL)' },
       },
       required: ['origin', 'destination', 'outbound_date'],

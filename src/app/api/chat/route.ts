@@ -154,6 +154,7 @@ export async function POST(request: NextRequest) {
                       outbound_date: inp.outbound_date as string,
                       return_date: inp.return_date as string | undefined,
                       adults: inp.adults as number | undefined,
+                      children: inp.children as number | undefined,
                       currency: inp.currency as string | undefined,
                     })
                     result = { flights, count: flights.length }
