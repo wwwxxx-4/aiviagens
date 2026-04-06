@@ -71,15 +71,10 @@ export async function GET(request: NextRequest) {
     const nights   = pkg.check_in && pkg.check_out ? tripDuration(pkg.check_in as string, pkg.check_out as string) : null
     const totalFormatted = pkg.total_price ? formatCurrency(Number(pkg.total_price), String(pkg.currency || 'BRL')) : '—'
 
-    return `
-    ${isCombined ? `<div class="pkg-separator"><span>${pkg.destination as string}${pkg.destination_country ? ', ' + pkg.destination_country : ''}</span></div>` : ''}
-
-    <!-- VOOS -->
-    ${flights.length > 0 ? `
-    <div class="section">
-      <div class="section-title">✈️ Voos</div>
-      ${flights.slice(0, 3).map(f => `
-      <div class="flight-card">
+    // ── helper to render a single flight leg ──────────────────────
+    const renderLeg = (f: Record<string,unknown>, label?: string) => `
+      <div class="flight-leg${label ? ' flight-leg-labeled' : ''}">
+        ${label ? `<div class="flight-leg-label">${label}</div>` : ''}
         <div class="flight-route">
           <div>
             <div class="flight-airport">${f.origin || '—'}</div>
@@ -100,8 +95,46 @@ export async function GET(request: NextRequest) {
           ${f.flight_number ? `<span class="flight-tag">${f.flight_number}</span>` : ''}
           ${f.cabin_class ? `<span class="flight-tag">${f.cabin_class}</span>` : ''}
         </div>
-        ${showPrices && f.price ? `<div class="flight-price">${formatCurrency(Number(f.price), String(f.currency || 'BRL'))}<small> / pessoa</small></div>` : ''}
-      </div>`).join('')}
+      </div>`
+
+    const adults = Number(pkg.adults || 1)
+    const children = Number(pkg.children || 0)
+    const paxLabel = `${adults} adulto${adults !== 1 ? 's' : ''}${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}`
+
+    return `
+    ${isCombined ? `<div class="pkg-separator"><span>${pkg.destination as string}${pkg.destination_country ? ', ' + pkg.destination_country : ''}</span></div>` : ''}
+
+    <!-- VIAJANTES + DATAS -->
+    <div class="trip-info-bar">
+      <div class="trip-info-item">👥 <strong>${paxLabel}</strong></div>
+      ${pkg.check_in ? `<div class="trip-info-item">📅 <strong>${checkIn} → ${checkOut}</strong>${nights ? ` &nbsp;·&nbsp; ${nights} noite${Number(nights) !== 1 ? 's' : ''}` : ''}</div>` : ''}
+      ${pkg.destination ? `<div class="trip-info-item">📍 <strong>${pkg.destination as string}${pkg.destination_country ? ', ' + pkg.destination_country : ''}</strong></div>` : ''}
+    </div>
+
+    <!-- VOOS -->
+    ${flights.length > 0 ? `
+    <div class="section">
+      <div class="section-title">✈️ Voos</div>
+      ${flights.slice(0, 3).map(f => {
+        const ret = f.return_flight as Record<string,unknown> | undefined
+        const hasReturn = !!ret
+        return `
+      <div class="flight-card">
+        ${hasReturn ? renderLeg(f, '🛫 IDA') : renderLeg(f)}
+        ${hasReturn && ret ? `
+        <div class="flight-divider"></div>
+        ${renderLeg(ret, '🛬 VOLTA')}` : ''}
+        ${showPrices && f.price ? `
+        <div class="flight-price-row">
+          <div class="flight-price">
+            ${adults > 1
+              ? `${formatCurrency(Number(f.price) * adults, String(f.currency || 'BRL'))} <small>total · ${formatCurrency(Number(f.price), String(f.currency || 'BRL'))}/pessoa × ${adults}</small>`
+              : `${formatCurrency(Number(f.price), String(f.currency || 'BRL'))} <small>/ pessoa</small>`
+            }
+          </div>
+          <div class="flight-price-disc">* Sujeito a taxas e disponibilidade</div>
+        </div>` : ''}
+      </div>`}).join('')}
     </div>` : ''}
 
     <!-- HOTÉIS -->
@@ -209,9 +242,17 @@ export async function GET(request: NextRequest) {
   .section{margin-bottom:36px}
   .section-title{font-size:15px;font-weight:700;color:#001A3D;padding-bottom:10px;border-bottom:2px solid #CCE0FF;margin-bottom:18px;display:flex;align-items:center;gap:8px}
 
+  /* ── TRIP INFO BAR ── */
+  .trip-info-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;background:#E6F0FF;border:1px solid #CCE0FF;border-radius:12px;padding:12px 18px}
+  .trip-info-item{font-size:12px;color:#001A3D;display:flex;align-items:center;gap:4px}
+
   /* ── FLIGHT ── */
-  .flight-card{background:#E6F0FF;border:1px solid #99BFFF;border-radius:12px;padding:16px 20px;margin-bottom:12px}
-  .flight-route{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+  .flight-card{background:#E6F0FF;border:1px solid #99BFFF;border-radius:12px;padding:16px 20px;margin-bottom:12px;overflow:hidden}
+  .flight-leg{padding:4px 0}
+  .flight-leg-labeled{padding:6px 0}
+  .flight-leg-label{font-size:10px;font-weight:700;color:#0066FF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+  .flight-divider{height:1px;background:#CCE0FF;margin:10px 0;border:none}
+  .flight-route{display:flex;align-items:center;gap:16px;margin-bottom:8px}
   .flight-airport{font-size:22px;font-weight:800;color:#001A3D;letter-spacing:-0.5px}
   .flight-time{font-size:11px;color:#6b7280;margin-top:2px}
   .flight-middle{flex:1;text-align:center}
@@ -219,10 +260,12 @@ export async function GET(request: NextRequest) {
   .flight-line{height:2px;background:linear-gradient(90deg,#99BFFF,#0066FF,#99BFFF);border-radius:2px;position:relative}
   .flight-line::after{content:'✈';position:absolute;right:-4px;top:-9px;font-size:13px;color:#0066FF}
   .flight-stops{font-size:10px;color:#0066FF;font-weight:600;margin-top:4px}
-  .flight-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .flight-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
   .flight-tag{background:#fff;border:1px solid #CCE0FF;border-radius:6px;padding:2px 8px;font-size:11px;color:#374151}
-  .flight-price{font-size:18px;font-weight:700;color:#0066FF;text-align:right;margin-top:8px}
-  .flight-price small{font-size:11px;font-weight:400;color:#9ca3af}
+  .flight-price-row{margin-top:10px;padding-top:10px;border-top:1px solid #CCE0FF}
+  .flight-price{font-size:17px;font-weight:700;color:#0066FF}
+  .flight-price small{font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px}
+  .flight-price-disc{font-size:10px;color:#9ca3af;margin-top:2px;font-style:italic}
 
   /* ── HOTEL ── */
   .hotel-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:12px}

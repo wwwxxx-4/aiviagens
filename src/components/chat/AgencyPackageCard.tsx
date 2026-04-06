@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, Tag, Coffee, Star } from 'lucide-react'
+import { MessageCircle, Tag, Coffee, Star, Plane } from 'lucide-react'
 import type { AgencyPackage } from '@/lib/agency-packages'
 
 function applyMarkup(price: number): number {
@@ -16,79 +16,108 @@ function applyMarkup(price: number): number {
   return price
 }
 
+// Background color per type (matching index3.html)
+const TYPE_BG: Record<string, string> = {
+  praia: '#0077B6',
+  montanha: '#2D6A4F',
+  natureza: '#386641',
+  cidade: '#1A4F8A',
+}
+const TYPE_EMOJI: Record<string, string> = {
+  praia: '🏖️',
+  montanha: '🏔️',
+  natureza: '🌿',
+  cidade: '🌆',
+}
+
 export function AgencyPackageCard({ pkg }: { pkg: AgencyPackage }) {
   const displayPrice = applyMarkup(pkg.preco)
+  const bg = TYPE_BG[pkg.tipo] || '#001A3D'
+  const em = TYPE_EMOJI[pkg.tipo] || '✈️'
 
   return (
-    <div className="bg-white rounded-xl border border-brand-100 overflow-hidden hover:border-brand-300 transition-all shadow-sm">
-      {pkg.imagem && (
-        <div className="relative">
+    <div className="rounded-xl overflow-hidden border border-brand-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 bg-white">
+      {/* Image / color header */}
+      <div className="relative h-28 overflow-hidden">
+        {pkg.imagem ? (
           <img
             src={pkg.imagem}
             alt={pkg.destino}
-            className="w-full h-28 object-cover"
-            onError={e => (e.currentTarget.style.display = 'none')}
+            className="w-full h-full object-cover"
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-2 left-3">
-            <p className="text-white font-bold text-sm drop-shadow">{pkg.destino}</p>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: bg }}>
+            {em}
           </div>
-          {/* Badges */}
-          <div className="absolute top-2 right-2 flex gap-1">
-            {pkg.all_inclusive && (
-              <span className="bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5">
-                <Tag size={8} /> All Inc.
-              </span>
-            )}
-            {pkg.luxo && (
-              <span className="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5">
-                <Star size={8} /> Luxo
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="p-3">
-        {!pkg.imagem && (
-          <p className="font-bold text-sm text-gray-900 mb-1">{pkg.destino}</p>
         )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,26,61,.85) 0%, rgba(0,26,61,.2) 55%, transparent 100%)' }} />
 
-        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
-          🏨 {pkg.hotel}
-          {pkg.cafe_manha && <span className="text-brand-500 flex items-center gap-0.5"><Coffee size={9} /> Café</span>}
+        {/* Destination label at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-2">
+          <p className="text-white font-bold text-sm leading-tight drop-shadow-sm truncate">{pkg.destino}</p>
+          {pkg.regiao && (
+            <p className="text-white/70 text-xs mt-0.5 truncate">{pkg.regiao}</p>
+          )}
+        </div>
+
+        {/* Badges top-right */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+          {pkg.all_inclusive && (
+            <span className="bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5 whitespace-nowrap">
+              <Tag size={8} /> All Inc.
+            </span>
+          )}
+          {pkg.luxo && (
+            <span className="bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5">
+              <Star size={8} /> Luxo
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Card body */}
+      <div className="p-3">
+        {/* Hotel */}
+        <p className="text-xs text-gray-600 leading-tight mb-1.5 flex items-center gap-1 truncate">
+          🏨 <span className="truncate">{pkg.hotel}</span>
+          {pkg.cafe_manha && <span className="text-brand-500 shrink-0 flex items-center gap-0.5"><Coffee size={9} /></span>}
         </p>
 
-        <div className="flex flex-wrap gap-1 mb-2">
-          <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">
-            ✈️ {pkg.origem}
+        {/* Chips: origem + datas */}
+        <div className="flex flex-wrap gap-1 mb-1.5">
+          <span className="text-xs bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full border border-brand-100 flex items-center gap-0.5 whitespace-nowrap">
+            <Plane size={8} /> {pkg.origem}
           </span>
-          <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">
+          <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 whitespace-nowrap">
             📅 {pkg.ida} → {pkg.volta}
           </span>
         </div>
 
+        {/* Voo info */}
         {pkg.voo_ida && (
-          <p className="text-xs text-gray-400 mb-1">🛫 {pkg.voo_ida}</p>
+          <p className="text-xs text-gray-400 truncate leading-tight">🛫 {pkg.voo_ida}</p>
         )}
         {pkg.voo_volta && (
-          <p className="text-xs text-gray-400 mb-2">🛬 {pkg.voo_volta}</p>
+          <p className="text-xs text-gray-400 truncate leading-tight mb-1">🛬 {pkg.voo_volta}</p>
         )}
 
-        <div className="flex items-center justify-between pt-1 border-t border-gray-50">
+        {/* Price + CTA */}
+        <div className="flex items-center justify-between pt-2 mt-1 border-t border-gray-50">
           <div>
             <span className="text-base font-bold text-brand-600">
               R$ {displayPrice.toLocaleString('pt-BR')}
             </span>
-            <span className="text-xs text-gray-400 ml-1">/ 2 pessoas</span>
+            <span className="text-xs text-gray-400 ml-1">/ 2 pax</span>
           </div>
           <a
             href={pkg.wa_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors"
           >
-            <MessageCircle size={11} /> Quero este!
+            <MessageCircle size={11} /> Quero!
           </a>
         </div>
       </div>
@@ -101,21 +130,25 @@ export function AgencyPackageResults({ packages }: { packages: AgencyPackage[] }
 
   return (
     <div className="mt-3">
-      <div className="flex items-center gap-2 mb-2">
+      {/* Header bar */}
+      <div className="flex items-center gap-2 mb-3">
         <div className="h-px flex-1 bg-brand-100" />
-        <p className="text-xs font-semibold text-brand-600 uppercase tracking-wide px-2">
-          🏷️ {packages.length} pacotes exclusivos da agência
+        <p className="text-xs font-bold text-brand-600 uppercase tracking-wider px-2 flex items-center gap-1.5">
+          🏷️ {packages.length} pacote{packages.length !== 1 ? 's' : ''} exclusivo{packages.length !== 1 ? 's' : ''} Mesquita Turismo
         </p>
         <div className="h-px flex-1 bg-brand-100" />
       </div>
+
+      {/* Grid */}
       <div className="grid grid-cols-2 gap-2">
         {packages.slice(0, 4).map(p => (
           <AgencyPackageCard key={p.id} pkg={p} />
         ))}
       </div>
+
       {packages.length > 4 && (
-        <p className="text-xs text-center text-gray-400 mt-2">
-          +{packages.length - 4} outros pacotes disponíveis — pergunte ao assistente!
+        <p className="text-xs text-center text-gray-400 mt-2 bg-brand-50 rounded-lg py-1.5 border border-brand-100">
+          +{packages.length - 4} pacotes disponíveis — pergunte ao assistente!
         </p>
       )}
     </div>

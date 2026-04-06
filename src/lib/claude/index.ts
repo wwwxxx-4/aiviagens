@@ -73,6 +73,24 @@ IMPORTANTE: Use ferramentas de busca sempre que precisar de dados reais. Nunca i
 export const TRAVEL_SYSTEM_PROMPT = getTravelSystemPrompt()
 
 export const TRAVEL_TOOLS: Anthropic.Tool[] = [
+  // ─── SEMPRE PRIMEIRO: pacotes da agência ───────────────────────────────────
+  {
+    name: 'search_agency_packages',
+    description: 'Busca pacotes EXCLUSIVOS da Mesquita Turismo no banco de dados da agência. OBRIGATÓRIO: use SEMPRE como PRIMEIRA ferramenta quando o usuário mencionar qualquer destino, viagem ou tipo de turismo. Só use search_flights/search_hotels se não houver pacotes ou o cliente quiser algo específico diferente.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        destination: { type: 'string', description: 'Destino mencionado pelo usuário. Ex: Trancoso, Lisboa, Fortaleza, Nordeste' },
+        origin: { type: 'string', description: 'Cidade/aeroporto de origem. Ex: São Paulo, GRU, CGH, BSB' },
+        tipo: { type: 'string', enum: ['praia', 'montanha', 'natureza', 'cidade'], description: 'Tipo de viagem inferido' },
+        month: { type: 'string', description: 'Mês de ida (MM). Ex: "07" para julho, "12" para dezembro' },
+        max_price: { type: 'number', description: 'Orçamento máximo em BRL' },
+        all_inclusive: { type: 'boolean' },
+        luxo: { type: 'boolean' },
+      },
+      required: [],
+    },
+  },
   {
     name: 'extract_travel_intent',
     description: 'Extrai intenção de viagem da conversa. Use sempre que identificar um destino.',
