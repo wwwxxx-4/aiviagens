@@ -3,6 +3,7 @@ import { createLLMProvider, getDefaultProvider } from '@/lib/llm'
 import { searchFlights, searchHotels, searchActivities, getWeather } from '@/lib/serpapi'
 import { fetchAgencyPackages, filterPackages, formatPackagesForAgent } from '@/lib/agency-packages'
 import { getTravelSystemPrompt, TRAVEL_TOOLS } from '@/lib/claude'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { NextRequest } from 'next/server'
 import type { LLMMessage, LLMTool, ProviderID } from '@/lib/llm'
 
@@ -23,6 +24,22 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       console.error('Auth error:', authError)
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+    }
+
+    // ── Rate limiting: 30 req/hora, 5 req/minuto por usuário ──────────────────
+    const rateLimit = await checkRateLimit(user.id, 'chat', 30, 5)
+    if (!rateLimit.allowed) {
+      const msg = rateLimit.reason === 'burst'
+        ? `Muitas mensagens em pouco tempo. Aguarde ${rateLimit.resetIn}s.`
+        : `Limite de mensagens por hora atingido. Tente novamente em ${Math.ceil(rateLimit.resetIn / 60)} minutos.`
+      return new Response(JSON.stringify({ error: msg }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimit.resetIn),
+          'X-RateLimit-Remaining': '0',
+        },
+      })
     }
 
     const body = await request.json()
@@ -62,6 +79,18 @@ export async function POST(request: NextRequest) {
         return new Response(JSON.stringify({ error: 'Error creating conversation: ' + convError.message }), { status: 500 })
       }
       convId = conv.id
+    } else {
+      // Verificar que a conversa pertence ao usuário autenticado (isolamento de dados)
+      const { data: conv, error: convCheckError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', convId)
+        .eq('user_id', user.id)
+        .single()
+
+      if (convCheckError || !conv) {
+        return new Response(JSON.stringify({ error: 'Conversation not found or access denied' }), { status: 403 })
+      }
     }
 
     // Save user message
@@ -73,7 +102,7 @@ export async function POST(request: NextRequest) {
       console.error('Message insert error:', msgError)
     }
 
-    // Load history
+    // Load history — mensagens apenas da conversa verificada acima
     const { data: history } = await supabase
       .from('messages')
       .select('role, content')
@@ -147,32 +176,78 @@ export async function POST(request: NextRequest) {
                     result = { intent: inp, extracted: true }
                     toolResultsMetadata.travel_intent = inp
                     break
-                  case 'search_flights':
+                  case 'search_flights': {
+                    // ── Validação de inputs ──────────────────────────────────
+                    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+                    const iataRegex = /^[A-Z]{3}(,[A-Z]{3})*$/i  // ex: GRU ou GRU,CGH,VCP
+                    const flightOrigin = String(inp.origin || '').trim().toUpperCase()
+                    const flightDest = String(inp.destination || '').trim().toUpperCase()
+                    const flightDate = String(inp.outbound_date || '').trim()
+                    const flightReturn = inp.return_date ? String(inp.return_date).trim() : undefined
+                    const flightAdults = Math.min(Math.max(Number(inp.adults) || 1, 1), 9)
+                    const flightChildren = Math.min(Math.max(Number(inp.children) || 0, 0), 8)
+
+                    if (!iataRegex.test(flightOrigin) || !iataRegex.test(flightDest)) {
+                      result = { error: 'Código de aeroporto inválido. Use código IATA (ex: GRU, SAO, RIO).' }
+                      break
+                    }
+                    if (!dateRegex.test(flightDate) || new Date(flightDate) < new Date()) {
+                      result = { error: 'Data de ida inválida ou no passado. Use formato YYYY-MM-DD com data futura.' }
+                      break
+                    }
+                    if (flightReturn && (!dateRegex.test(flightReturn) || new Date(flightReturn) <= new Date(flightDate))) {
+                      result = { error: 'Data de volta inválida. Deve ser posterior à data de ida.' }
+                      break
+                    }
+                    // ────────────────────────────────────────────────────────
                     const flights = await searchFlights({
-                      origin: inp.origin as string,
-                      destination: inp.destination as string,
-                      outbound_date: inp.outbound_date as string,
-                      return_date: inp.return_date as string | undefined,
-                      adults: inp.adults as number | undefined,
-                      children: inp.children as number | undefined,
+                      origin: flightOrigin,
+                      destination: flightDest,
+                      outbound_date: flightDate,
+                      return_date: flightReturn,
+                      adults: flightAdults,
+                      children: flightChildren,
                       currency: inp.currency as string | undefined,
                     })
                     result = { flights, count: flights.length }
                     toolResultsMetadata.flights = flights
-                    send({ type: 'flights_found', flights, adults: (inp.adults as number) || 1, children: (inp.children as number) || 0 })
+                    send({ type: 'flights_found', flights, adults: flightAdults, children: flightChildren })
                     break
-                  case 'search_hotels':
+                  }
+                  case 'search_hotels': {
+                    // ── Validação de inputs ──────────────────────────────────
+                    const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+                    const hotelDest = String(inp.destination || '').trim()
+                    const hotelIn = String(inp.check_in || '').trim()
+                    const hotelOut = String(inp.check_out || '').trim()
+                    const hotelAdults = Math.min(Math.max(Number(inp.adults) || 1, 1), 9)
+                    const hotelChildren = Math.min(Math.max(Number(inp.children) || 0, 0), 8)
+
+                    if (!hotelDest) {
+                      result = { error: 'Destino não informado para busca de hotéis.' }
+                      break
+                    }
+                    if (!dateRegex.test(hotelIn) || !dateRegex.test(hotelOut)) {
+                      result = { error: 'Datas de check-in/check-out inválidas. Use formato YYYY-MM-DD.' }
+                      break
+                    }
+                    if (new Date(hotelOut) <= new Date(hotelIn)) {
+                      result = { error: 'Check-out deve ser posterior ao check-in.' }
+                      break
+                    }
+                    // ────────────────────────────────────────────────────────
                     const hotels = await searchHotels({
-                      destination: inp.destination as string,
-                      check_in: inp.check_in as string,
-                      check_out: inp.check_out as string,
-                      adults: inp.adults as number | undefined,
+                      destination: hotelDest,
+                      check_in: hotelIn,
+                      check_out: hotelOut,
+                      adults: hotelAdults,
                       currency: inp.currency as string | undefined,
                     })
                     result = { hotels, count: hotels.length }
                     toolResultsMetadata.hotels = hotels
-                    send({ type: 'hotels_found', hotels, check_in: inp.check_in as string, check_out: inp.check_out as string, adults: (inp.adults as number) || 1, children: (inp.children as number) || 0 })
+                    send({ type: 'hotels_found', hotels, check_in: hotelIn, check_out: hotelOut, adults: hotelAdults, children: hotelChildren })
                     break
+                  }
                   case 'search_activities':
                     const activities = await searchActivities(inp.destination as string, inp.category as string)
                     result = { activities, count: activities.length }
