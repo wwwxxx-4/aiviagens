@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Plane, Hotel, MapPin, Star, ArrowRight, Globe, Sparkles, Clock } from 'lucide-react'
+import { MesquitaLogo } from '@/components/ui/MesquitaLogo'
 
 const features = [
   {
@@ -58,16 +59,9 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {LOGO_URL ? (
-              <img src={LOGO_URL} alt="Mesquita Turismo" className="h-9 w-auto object-contain" />
+              <img src={LOGO_URL} alt="Mesquita Turismo" className="h-10 w-auto object-contain" />
             ) : (
-              <>
-                <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-                  <Globe size={16} className="text-white" />
-                </div>
-                <span className="font-display text-lg font-semibold text-brand-700">
-                  AI Mesquita Turismo
-                </span>
-              </>
+              <MesquitaLogo height={44} />
             )}
           </div>
           <div className="flex items-center gap-3">
@@ -217,10 +211,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-black/5 py-8">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-sm text-gray-400">
-          <div className="flex items-center gap-2">
-            <Globe size={14} className="text-brand-400" />
-            <span>AI Mesquita Turismo</span>
-          </div>
+          <MesquitaLogo height={32} />
           <div className="flex items-center gap-1 text-xs">
             <Clock size={12} />
             <span>Dados em tempo real</span>
