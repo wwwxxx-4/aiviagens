@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { UserProfile } from '@/types'
 import toast from 'react-hot-toast'
-import { MesquitaLogoCompact } from '@/components/ui/MesquitaLogo'
 
 // Email do administrador — único com acesso às Configurações
 const ADMIN_EMAIL = 'westermesquita@gmail.com'
@@ -88,8 +87,12 @@ export default function DashboardSidebar({ profile, userEmail }: DashboardSideba
 
         {/* Logo */}
         <div className="px-4 pt-4 pb-3 border-b border-black/5">
-          <Link href="/dashboard" onClick={() => setOpen(false)}>
-            <MesquitaLogoCompact height={36} />
+          <Link href="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2">
+            <Globe size={18} className="text-brand-500 shrink-0" />
+            <span className="font-display font-bold text-sm text-brand-700 leading-tight">
+              AI Mesquita<br />
+              <span className="text-brand-400 font-medium text-xs tracking-wide">Turismo</span>
+            </span>
           </Link>
         </div>
 

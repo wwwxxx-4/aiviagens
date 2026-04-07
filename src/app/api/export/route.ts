@@ -439,7 +439,6 @@ export async function GET(request: NextRequest) {
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${filename}"`,
     },
   })
 }

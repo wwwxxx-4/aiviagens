@@ -96,23 +96,10 @@ export default function PackageDetailPage() {
   async function handleExport() {
     setExporting(true)
     try {
-      const res = await fetch(`/api/export?id=${id}`)
-      if (!res.ok) throw new Error('Erro ao gerar exportação')
-      const html = await res.text()
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const win = window.open(url, '_blank')
-      if (!win) {
-        // fallback: se popup bloqueado, faz download
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `orcamento-${pkg?.destination?.toLowerCase().replace(/\s+/g, '-') || 'viagem'}.html`
-        a.click()
-        toast.success('Arquivo baixado! Abra-o e use Ctrl+P → Salvar como PDF.')
-      } else {
-        toast.success('Orçamento aberto! Use Ctrl+P → "Salvar como PDF" para baixar.', { duration: 6000 })
-      }
-      setTimeout(() => URL.revokeObjectURL(url), 30000)
+      // Open the export page directly — the page auto-triggers window.print()
+      // which shows the browser's print dialog with "Save as PDF" option
+      window.open(`/api/export?id=${id}&print=1`, '_blank')
+      toast.success('Orçamento aberto! Clique em "Salvar como PDF" no diálogo de impressão.', { duration: 6000 })
     } catch {
       toast.error('Erro ao exportar. Tente novamente.')
     } finally {
