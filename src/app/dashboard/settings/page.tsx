@@ -1,151 +1,254 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Settings, Percent, Phone, Globe, Save, Info, Upload, X, Mail } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import type { AgencySettings } from '@/lib/booking'
-import toast from 'react-hot-toast'
+import { useEffect, useState } from 'react'
+import { User, Phone, Mail, Calendar, Plane, Hotel, Users, RefreshCw, Copy, Check } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
 
-const STORAGE_KEY = 'iv_agency_settings'
+interface Lead {
+  id: string
+  created_at: string
+  full_name: string | null
+  birth_date: string | null
+  cpf: string | null
+  email: string | null
+  phone: string | null
+  adults: number
+  children: number
+  flight_info: Record<string, unknown>[] | null
+  hotel_info: Record<string, unknown>[] | null
+  conversation_id: string | null
+}
 
-const defaults: AgencySettings = {
-  agencyName: 'Mesquita Turismo', whatsapp: '5511953967095',
-  phone: '(11) 95396-7095', email: 'contato@mesquitaturismo.com.br', logoUrl: '',
-  bookingFlightsUrl: 'https://www.comprarviagem.com.br/mesquitaturismo',
-  bookingHotelsUrl: 'https://www.comprarviagem.com.br/mesquitaturismo/hotel-list',
-  bookingActivitiesUrl: 'https://www.civitatis.com/br/?ag_aid=63335',
-  markupFlights: 0, markupHotels: 0, markupActivities: 0,
+function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
+      className="ml-1 text-gray-300 hover:text-brand-500 transition-colors"
+    >
+      {copied ? <Check size={10} className="text-green-500" /> : <Copy size={10} />}
+    </button>
+  )
 }
 
 export default function SettingsPage() {
-  const [s, setS] = useState<AgencySettings>(defaults)
-  const [saving, setSaving] = useState(false)
-  const [logoPreview, setLogoPreview] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
+  async function fetchLeads() {
+    setRefreshing(true)
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) { const p = { ...defaults, ...JSON.parse(saved) }; setS(p); if (p.logoUrl) setLogoPreview(p.logoUrl) }
-    } catch { /* ignore */ }
-  }, [])
-
-  function set<K extends keyof AgencySettings>(key: K, value: AgencySettings[K]) { setS(p => ({ ...p, [key]: value })) }
-
-  function handleLogo(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]; if (!file) return
-    if (file.size > 2 * 1024 * 1024) { toast.error('Imagem muito grande. Máximo 2MB.'); return }
-    const reader = new FileReader()
-    reader.onload = ev => { const d = ev.target?.result as string; setLogoPreview(d); set('logoUrl', d) }
-    reader.readAsDataURL(file)
+      const res = await fetch('/api/admin/leads')
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Erro'); return }
+      setLeads(data.leads || [])
+      setError('')
+    } catch { setError('Erro de conexão') }
+    finally { setLoading(false); setRefreshing(false) }
   }
 
-  function handleSave(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); toast.success('Configurações salvas!') }
-    catch { toast.error('Erro ao salvar.') }
-    finally { setSaving(false) }
+  useEffect(() => { fetchLeads() }, [])
+
+  function fmtDate(iso: string) {
+    return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   }
+
+  function waLink(phone: string, name: string) {
+    const num = phone.replace(/\D/g, '')
+    const msg = `Olá ${name}! Sou da Mesquita Turismo. Vi que você tem interesse em uma viagem. Posso ajudar com a reserva?`
+    return `https://wa.me/55${num}?text=${encodeURIComponent(msg)}`
+  }
+
+  const withFlights = leads.filter(l => l.flight_info && l.flight_info.length > 0).length
+  const withHotels  = leads.filter(l => l.hotel_info  && l.hotel_info.length  > 0).length
+  const withPhone   = leads.filter(l => l.phone).length
 
   return (
-    <div className="p-8 max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center"><Settings size={16} className="text-brand-500" /></div>
-        <div><h1 className="font-display text-2xl font-bold text-gray-900">Configurações</h1><p className="text-gray-500 text-sm">Personalize o assistente para sua agência.</p></div>
+    <div className="p-6 md:p-8 max-w-5xl">
+
+      {/* ── Header ── */}
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-gray-900">⚙ Configurações · Admin</h1>
+          <p className="text-sm text-gray-400 mt-1">Leads captados pelo assistente de viagens</p>
+        </div>
+        <button onClick={fetchLeads} disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-50 text-brand-600 text-sm font-medium hover:bg-brand-100 transition-colors disabled:opacity-50">
+          <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
+          Atualizar
+        </button>
       </div>
-      <div className="bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 mb-5 flex gap-2 text-sm text-brand-700">
-        <Info size={15} className="shrink-0 mt-0.5" />
-        <span>Salvo no navegador. Para fixar permanentemente, cole as variáveis do preview abaixo no <code className="bg-brand-100 px-1 rounded text-xs">.env.local</code>.</span>
+
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: 'Total de leads',      value: leads.length,  color: 'text-brand-600' },
+          { label: 'Com WhatsApp',        value: withPhone,     color: 'text-green-500' },
+          { label: 'Interesse em voos',   value: withFlights,   color: 'text-amber-500' },
+          { label: 'Interesse em hotéis', value: withHotels,    color: 'text-purple-500' },
+        ].map(s => (
+          <div key={s.label} className="bg-white rounded-xl border border-black/5 p-4 text-center">
+            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+          </div>
+        ))}
       </div>
-      <form onSubmit={handleSave} className="space-y-5">
 
-        {/* Logo */}
-        <section className="bg-white rounded-2xl border border-black/5 p-5">
-          <h2 className="font-semibold text-gray-800 mb-4 text-sm flex items-center gap-2"><Upload size={14} className="text-brand-400" /> Logomarca</h2>
-          <div className="flex items-center gap-4">
-            {logoPreview ? (
-              <div className="relative">
-                <img src={logoPreview} alt="Logo" className="h-16 max-w-[160px] object-contain rounded-lg border border-black/5" />
-                <button type="button" onClick={() => { setLogoPreview(''); set('logoUrl', '') }}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600"><X size={10} /></button>
-              </div>
-            ) : (
-              <div onClick={() => fileRef.current?.click()}
-                className="w-40 h-16 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-300 hover:bg-brand-50 transition-all">
-                <Upload size={16} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Clique para enviar</span>
-              </div>
-            )}
-            <div>
-              <button type="button" onClick={() => fileRef.current?.click()} className="text-sm text-brand-500 hover:text-brand-700 font-medium">
-                {logoPreview ? 'Trocar imagem' : 'Selecionar logo'}</button>
-              <p className="text-xs text-gray-400 mt-1">PNG, JPG ou SVG · Máx. 2MB</p>
-            </div>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogo} />
-          </div>
-        </section>
+      {/* ── Error ── */}
+      {error && (
+        <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-sm text-red-600 mb-4">
+          {error === 'Forbidden'
+            ? '⚠️ Acesso restrito ao administrador.'
+            : `⚠️ ${error}. Verifique se a tabela passenger_leads foi criada no Supabase (SQL abaixo).`}
+          <details className="mt-2">
+            <summary className="cursor-pointer text-xs font-semibold">Ver SQL para criar a tabela</summary>
+            <pre className="mt-2 text-xs bg-gray-900 text-green-400 p-3 rounded-lg overflow-auto whitespace-pre-wrap">{SQL_CREATE}</pre>
+          </details>
+        </div>
+      )}
 
-        {/* Agency data */}
-        <section className="bg-white rounded-2xl border border-black/5 p-5">
-          <h2 className="font-semibold text-gray-800 mb-4 text-sm flex items-center gap-2"><Globe size={14} className="text-brand-400" /> Dados da agência</h2>
-          <div className="space-y-4">
-            <Input label="Nome da agência" value={s.agencyName} onChange={e => set('agencyName', e.target.value)} />
-            <div className="grid grid-cols-2 gap-4">
-              <Input label="Telefone" value={s.phone} onChange={e => set('phone', e.target.value)} icon={<Phone size={14} />} />
-              <Input label="E-mail" value={s.email} onChange={e => set('email', e.target.value)} icon={<Mail size={14} />} />
-            </div>
-            <Input label="WhatsApp (com DDI, só números)" value={s.whatsapp} onChange={e => set('whatsapp', e.target.value.replace(/\D/g, ''))} hint="Ex: 5511953967095" icon={<Phone size={14} />} />
-          </div>
-        </section>
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-28 bg-gray-50 rounded-2xl animate-pulse" />)}
+        </div>
+      )}
 
-        {/* Booking links */}
-        <section className="bg-white rounded-2xl border border-black/5 p-5">
-          <h2 className="font-semibold text-gray-800 mb-4 text-sm flex items-center gap-2"><Globe size={14} className="text-brand-400" /> Links de reserva</h2>
-          <div className="space-y-4">
-            <Input label="Site de voos (URL base)" value={s.bookingFlightsUrl} onChange={e => set('bookingFlightsUrl', e.target.value)} />
-            <Input label="Site de hotéis" value={s.bookingHotelsUrl} onChange={e => set('bookingHotelsUrl', e.target.value)} hint="O cliente deve preencher os dados no site" />
-            <Input label="Site de atividades / ingressos" value={s.bookingActivitiesUrl} onChange={e => set('bookingActivitiesUrl', e.target.value)} />
-          </div>
-        </section>
+      {/* ── Empty ── */}
+      {!loading && !error && leads.length === 0 && (
+        <div className="text-center py-16 bg-white rounded-2xl border border-black/5">
+          <User size={36} className="text-brand-200 mx-auto mb-3" />
+          <p className="text-gray-500 text-sm font-medium">Nenhum lead captado ainda</p>
+          <p className="text-gray-400 text-xs mt-1">
+            Quando um cliente fornecer dados para reserva no chat, ele aparecerá aqui automaticamente.
+          </p>
+        </div>
+      )}
 
-        {/* Markup */}
-        <section className="bg-white rounded-2xl border border-black/5 p-5">
-          <h2 className="font-semibold text-gray-800 mb-1 text-sm flex items-center gap-2"><Percent size={14} className="text-brand-400" /> Markup de preços</h2>
-          <p className="text-xs text-gray-400 mb-4">Percentual adicionado ao preço exibido ao cliente.</p>
-          <div className="grid grid-cols-3 gap-4">
-            {(['markupFlights', 'markupHotels', 'markupActivities'] as const).map((key, i) => (
-              <div key={key} className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-gray-700">{['Voos (%)', 'Hotéis (%)', 'Atividades (%)'][i]}</label>
-                <div className="relative">
-                  <input type="number" min="0" max="100" step="0.5" value={s[key]} onChange={e => set(key, Number(e.target.value))}
-                    className="w-full h-10 px-3 pr-7 text-sm rounded-xl border border-black/10 bg-white focus:outline-none focus:ring-2 focus:ring-brand-300" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+      {/* ── Leads ── */}
+      <div className="space-y-3">
+        {leads.map(lead => {
+          const flight = lead.flight_info?.[0]
+          const hotel  = lead.hotel_info?.[0]
+          return (
+            <div key={lead.id} className="bg-white rounded-2xl border border-black/5 p-5 hover:border-brand-200 transition-all">
+
+              {/* Row 1: avatar + name + actions */}
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-brand-700">
+                      {(lead.full_name || '?')[0].toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{lead.full_name || '—'}</p>
+                    <p className="text-xs text-gray-400">{fmtDate(lead.created_at)}</p>
+                  </div>
                 </div>
-                {s[key] > 0 && <p className="text-xs text-brand-600">R$ 1.000 → R$ {Math.ceil(1000 * (1 + s[key] / 100)).toLocaleString('pt-BR')}</p>}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {lead.adults > 0 && (
+                    <span className="flex items-center gap-1 text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded-lg">
+                      <Users size={10} />
+                      {lead.adults} adulto{lead.adults !== 1 ? 's' : ''}
+                      {lead.children > 0 ? ` + ${lead.children} criança${lead.children !== 1 ? 's' : ''}` : ''}
+                    </span>
+                  )}
+                  {lead.phone && (
+                    <a href={waLink(lead.phone, lead.full_name || 'Cliente')} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+                      <Phone size={10} /> Contatar via WhatsApp
+                    </a>
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* .env preview */}
-        <section className="bg-gray-50 rounded-2xl border border-black/5 p-5">
-          <h2 className="font-semibold text-gray-800 mb-3 text-sm">Preview .env.local</h2>
-          <pre className="text-xs text-gray-600 bg-white rounded-xl p-3 border border-black/5 overflow-x-auto leading-6 whitespace-pre-wrap select-all">
-{`NEXT_PUBLIC_AGENCY_NAME=${s.agencyName}
-NEXT_PUBLIC_AGENCY_PHONE=${s.phone}
-NEXT_PUBLIC_AGENCY_EMAIL=${s.email}
-NEXT_PUBLIC_WHATSAPP=${s.whatsapp}
-NEXT_PUBLIC_BOOKING_FLIGHTS_URL=${s.bookingFlightsUrl}
-NEXT_PUBLIC_BOOKING_HOTELS_URL=${s.bookingHotelsUrl}
-NEXT_PUBLIC_BOOKING_ACTIVITIES_URL=${s.bookingActivitiesUrl}
-NEXT_PUBLIC_MARKUP_FLIGHTS=${s.markupFlights}
-NEXT_PUBLIC_MARKUP_HOTELS=${s.markupHotels}
-NEXT_PUBLIC_MARKUP_ACTIVITIES=${s.markupActivities}`}
-          </pre>
-        </section>
+              {/* Row 2: data fields */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                {lead.cpf && (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-400 mb-0.5">CPF</p>
+                    <p className="text-xs font-mono font-semibold text-gray-700 flex items-center">{lead.cpf}<CopyBtn text={lead.cpf} /></p>
+                  </div>
+                )}
+                {lead.birth_date && (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1"><Calendar size={9} /> Nascimento</p>
+                    <p className="text-xs font-semibold text-gray-700">{lead.birth_date}</p>
+                  </div>
+                )}
+                {lead.email && (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1"><Mail size={9} /> E-mail</p>
+                    <p className="text-xs font-semibold text-gray-700 flex items-center truncate">{lead.email}<CopyBtn text={lead.email} /></p>
+                  </div>
+                )}
+                {lead.phone && (
+                  <div className="bg-gray-50 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1"><Phone size={9} /> Telefone</p>
+                    <p className="text-xs font-semibold text-gray-700 flex items-center">{lead.phone}<CopyBtn text={lead.phone} /></p>
+                  </div>
+                )}
+              </div>
 
-        <Button type="submit" loading={saving} fullWidth size="lg"><Save size={14} /> Salvar configurações</Button>
-      </form>
+              {/* Row 3: interesse */}
+              {(flight || hotel) && (
+                <div className="border-t border-black/5 pt-3 flex flex-wrap gap-2">
+                  {flight && (
+                    <div className="flex items-center gap-2 bg-brand-50 border border-brand-100 rounded-lg px-3 py-1.5">
+                      <Plane size={10} className="text-brand-500 shrink-0" />
+                      <span className="text-xs text-brand-700 font-medium">
+                        {String(flight.origin ?? '?')} → {String(flight.destination ?? '?')}
+                        {flight.departure_time ? ` · ${String(flight.departure_time).slice(0, 10)}` : ''}
+                        {flight.price ? ` · ${formatCurrency(Number(flight.price), String(flight.currency ?? 'BRL'))}` : ''}
+                      </span>
+                    </div>
+                  )}
+                  {hotel && (
+                    <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
+                      <Hotel size={10} className="text-amber-600 shrink-0" />
+                      <span className="text-xs text-amber-700 font-medium">
+                        {String(hotel.name ?? '?')}
+                        {hotel.price_per_night ? ` · ${formatCurrency(Number(hotel.price_per_night), String(hotel.currency ?? 'BRL'))}/noite` : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
+
+// SQL shown in error state
+const SQL_CREATE = `-- Cole este SQL no Supabase > SQL Editor e execute:
+
+CREATE TABLE IF NOT EXISTS passenger_leads (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  conversation_id UUID,
+  full_name TEXT,
+  birth_date TEXT,
+  cpf TEXT,
+  email TEXT,
+  phone TEXT,
+  flight_info JSONB,
+  hotel_info JSONB,
+  adults INTEGER DEFAULT 1,
+  children INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE passenger_leads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service insert leads" ON passenger_leads
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admin read leads" ON passenger_leads
+  FOR SELECT USING (true);`

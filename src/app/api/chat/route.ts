@@ -358,10 +358,32 @@ export async function POST(request: NextRequest) {
                     break
                   case 'collect_passenger_data': {
                     result = { collected: true, ...inp }
+                    const lead = inp as Record<string, unknown>
+
+                    // ── Salvar lead no banco (backup sempre funciona) ────────
+                    try {
+                      await supabase.from('passenger_leads').insert({
+                        user_id: user.id,
+                        conversation_id: convId,
+                        full_name: lead.full_name ?? null,
+                        birth_date: lead.birth_date ?? null,
+                        cpf: lead.cpf ?? null,
+                        email: lead.email ?? null,
+                        phone: lead.phone ?? null,
+                        flight_info: toolResultsMetadata.flights ?? null,
+                        hotel_info: toolResultsMetadata.hotels ?? null,
+                        adults: Number(toolResultsMetadata.flight_adults ?? toolResultsMetadata.hotel_adults ?? 1),
+                        children: Number(toolResultsMetadata.flight_children ?? toolResultsMetadata.hotel_children ?? 0),
+                      })
+                      console.log('Lead salvo no banco:', lead.full_name)
+                    } catch (dbErr) {
+                      console.error('Lead DB error:', dbErr)
+                    }
+
                     // ── Notificação por e-mail para a agência ────────────────
                     try {
                       await sendPassengerEmailNotification(
-                        inp as Record<string, unknown>,
+                        lead,
                         toolResultsMetadata,
                         convId!
                       )
