@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Star, MapPin, MessageCircle, ExternalLink, Bookmark, Check, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { applyMarkup, generateActivitiesUrl, generateWhatsAppUrl, getAgencySettings } from '@/lib/booking'
+import { applyMarkup, generateActivitiesUrl, generateHotelBookingUrl, generateWhatsAppUrl, getAgencySettings } from '@/lib/booking'
 import { useSaveToPackage } from '@/hooks/useSaveToPackage'
 import type { HotelResult, ActivityResult } from '@/types'
 
@@ -102,10 +102,13 @@ export function HotelCard({ hotel, nights: nightsProp, adults = 1, children = 0 
             {saved ? <Check size={10} /> : <Bookmark size={10} />}
             {saved ? 'Salvo!' : isSaving ? '...' : 'Salvar'}
           </button>
-          {/* Apenas WhatsApp da agência — sem links externos de reserva */}
+          <a href={generateHotelBookingUrl()} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors">
+            <ExternalLink size={10} /> Reservar
+          </a>
           <a href={generateWhatsAppUrl(waMsg)} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-medium transition-colors">
-            <MessageCircle size={10} /> Reservar via WhatsApp
+            <MessageCircle size={10} /> WhatsApp
           </a>
         </div>
       </div>

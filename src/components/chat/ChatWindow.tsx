@@ -12,12 +12,12 @@ const DEFAULT_PROVIDER = 'openai' as const
 const DEFAULT_MODEL = 'gpt-4o'
 
 const SUGGESTIONS = [
-  'Quero viajar para Lisboa em julho, 2 pessoas, 7 dias',
-  'Voos de São Paulo para Miami em dezembro',
-  'Hotéis em Paris para lua de mel',
-  'O que fazer em Tokyo por 5 dias?',
-  'Pacote completo para Cancún em agosto, família com 2 filhos',
-  'Viagem romântica para Buenos Aires este mês',
+  'Quero viajar para Gramado em julho, 2 pessoas, 5 dias',
+  'Voos de São Paulo para Orlando em dezembro, 4 pessoas',
+  'Voos de Congonhas para Santos Dumont na próxima semana',
+  'Hotéis em Porto de Galinhas para lua de mel',
+  'Pacote completo São Paulo → Fortaleza, agosto, família com 2 filhos',
+  'O que fazer em Gramado no inverno?',
 ]
 
 interface ChatWindowProps { conversationId?: string }
@@ -49,7 +49,7 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#F5F8FF]">
+    <div className="flex flex-col h-screen bg-[#F0F9FD]">
       <div className="flex items-center justify-between px-6 py-3 border-b border-black/5 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
@@ -108,7 +108,7 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
           </div>
         )}
         <div className={cn(
-          'flex items-end gap-2 bg-[#F5F8FF] rounded-2xl border transition-all',
+          'flex items-end gap-2 bg-[#F0F9FD] rounded-2xl border transition-all',
           'border-black/8 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100'
         )}>
           {/* Search toggle button */}

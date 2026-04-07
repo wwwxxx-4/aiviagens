@@ -10,6 +10,79 @@ import type { LLMMessage, LLMTool, ProviderID } from '@/lib/llm'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
+// ── E-mail de notificação para a agência quando passageiro fornece dados ──────
+async function sendPassengerEmailNotification(
+  passenger: Record<string, unknown>,
+  context: Record<string, unknown>,
+  conversationId: string
+) {
+  const RESEND_API_KEY = process.env.RESEND_API_KEY
+  if (!RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY não configurado — notificação por e-mail ignorada')
+    return
+  }
+
+  const flights = context.flights as Array<Record<string, unknown>> | undefined
+  const hotels = context.hotels as Array<Record<string, unknown>> | undefined
+  const adults = Number(context.flight_adults || context.hotel_adults || 1)
+  const children = Number(context.flight_children || context.hotel_children || 0)
+
+  const flightInfo = flights && flights.length > 0
+    ? flights.map(f => `✈️ ${f.origin} → ${f.destination} | ${f.airline} | ${f.departure_time || ''} | R$ ${f.price || '-'}`).join('<br/>')
+    : null
+
+  const hotelInfo = hotels && hotels.length > 0
+    ? hotels.map(h => `🏨 ${h.name} | ${h.address || ''} | R$ ${h.price_per_night || '-'}/noite`).join('<br/>')
+    : null
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+      <div style="background:#177CBC;padding:20px 24px;border-radius:8px 8px 0 0">
+        <h1 style="color:white;margin:0;font-size:20px">🔔 Nova Solicitação de Reserva</h1>
+        <p style="color:#BDE2F4;margin:4px 0 0;font-size:14px">AI Mesquita Turismo</p>
+      </div>
+      <div style="background:#f9f9f9;padding:24px;border:1px solid #e5e7eb;border-radius:0 0 8px 8px">
+        <h2 style="color:#1a1a1a;font-size:16px;margin-top:0">👤 Dados do Passageiro</h2>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="padding:6px 0;color:#6b7280;width:140px">Nome completo:</td><td style="padding:6px 0;font-weight:600">${passenger.full_name || '—'}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">CPF:</td><td style="padding:6px 0;font-weight:600">${passenger.cpf || '—'}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Data de nascimento:</td><td style="padding:6px 0;font-weight:600">${passenger.birth_date || '—'}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">E-mail:</td><td style="padding:6px 0;font-weight:600">${passenger.email || '—'}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">WhatsApp:</td><td style="padding:6px 0;font-weight:600">${passenger.phone || '—'}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Passageiros:</td><td style="padding:6px 0;font-weight:600">${adults} adulto${adults !== 1 ? 's' : ''}${children > 0 ? ` + ${children} criança${children !== 1 ? 's' : ''}` : ''}</td></tr>
+        </table>
+        ${flightInfo ? `<h2 style="color:#1a1a1a;font-size:16px;margin-top:20px">✈️ Voo de interesse</h2><p style="line-height:1.8">${flightInfo}</p>` : ''}
+        ${hotelInfo ? `<h2 style="color:#1a1a1a;font-size:16px;margin-top:20px">🏨 Hotel de interesse</h2><p style="line-height:1.8">${hotelInfo}</p>` : ''}
+        <div style="margin-top:24px;padding:12px 16px;background:#EBF8FD;border-left:4px solid #177CBC;border-radius:4px">
+          <p style="margin:0;font-size:13px;color:#177CBC"><strong>ID da conversa:</strong> ${conversationId}</p>
+        </div>
+        <p style="margin-top:20px;font-size:13px;color:#9ca3af">Enviado automaticamente pelo sistema AI Mesquita Turismo.</p>
+      </div>
+    </div>
+  `
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'AI Mesquita Turismo <onboarding@resend.dev>',
+      to: ['westermesquita@gmail.com'],
+      subject: `🔔 Nova reserva: ${passenger.full_name || 'Passageiro'} — AI Mesquita Turismo`,
+      html,
+    }),
+  })
+
+  if (!response.ok) {
+    const errText = await response.text()
+    throw new Error(`Resend API error: ${response.status} — ${errText}`)
+  }
+
+  console.log('Email de notificação enviado para westermesquita@gmail.com')
+}
+
 const LLMTOOLS: LLMTool[] = TRAVEL_TOOLS.map(t => ({
   name: t.name,
   description: t.description ?? '',
@@ -211,6 +284,8 @@ export async function POST(request: NextRequest) {
                     })
                     result = { flights, count: flights.length }
                     toolResultsMetadata.flights = flights
+                    toolResultsMetadata.flight_adults = flightAdults
+                    toolResultsMetadata.flight_children = flightChildren
                     send({ type: 'flights_found', flights, adults: flightAdults, children: flightChildren })
                     break
                   }
@@ -245,6 +320,10 @@ export async function POST(request: NextRequest) {
                     })
                     result = { hotels, count: hotels.length }
                     toolResultsMetadata.hotels = hotels
+                    toolResultsMetadata.hotel_adults = hotelAdults
+                    toolResultsMetadata.hotel_children = hotelChildren
+                    toolResultsMetadata.hotel_check_in = hotelIn
+                    toolResultsMetadata.hotel_check_out = hotelOut
                     send({ type: 'hotels_found', hotels, check_in: hotelIn, check_out: hotelOut, adults: hotelAdults, children: hotelChildren })
                     break
                   }
@@ -266,7 +345,8 @@ export async function POST(request: NextRequest) {
                       title: inp.title as string, destination: inp.destination as string,
                       destination_country: inp.destination_country as string,
                       check_in: inp.check_in as string, check_out: inp.check_out as string,
-                      adults: (inp.adults as number) || 1, children: (inp.children as number) || 0,
+                      adults: Number(inp.adults) || Number(toolResultsMetadata.flight_adults) || 1,
+                      children: Number(inp.children) || Number(toolResultsMetadata.flight_children) || 0,
                       total_price: inp.total_price as number, currency: (inp.currency as string) || 'BRL',
                       notes: inp.notes as string,
                       flight_data: toolResultsMetadata.flights || {},
@@ -276,6 +356,20 @@ export async function POST(request: NextRequest) {
                     result = { saved: !pkgErr }
                     send({ type: 'package_saved', success: !pkgErr })
                     break
+                  case 'collect_passenger_data': {
+                    result = { collected: true, ...inp }
+                    // ── Notificação por e-mail para a agência ────────────────
+                    try {
+                      await sendPassengerEmailNotification(
+                        inp as Record<string, unknown>,
+                        toolResultsMetadata,
+                        convId!
+                      )
+                    } catch (emailErr) {
+                      console.error('Email notification error:', emailErr)
+                    }
+                    break
+                  }
                   default:
                     result = { error: 'Ferramenta desconhecida' }
                 }

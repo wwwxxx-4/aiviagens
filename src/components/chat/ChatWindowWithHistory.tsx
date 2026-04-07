@@ -44,7 +44,13 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
         content: m.content,
         status: 'done' as const,
         flights: m.metadata?.flights as ChatMessage['flights'],
+        flight_adults: m.metadata?.flight_adults as number | undefined,
+        flight_children: m.metadata?.flight_children as number | undefined,
         hotels: m.metadata?.hotels as ChatMessage['hotels'],
+        hotel_check_in: m.metadata?.hotel_check_in as string | undefined,
+        hotel_check_out: m.metadata?.hotel_check_out as string | undefined,
+        hotel_adults: m.metadata?.hotel_adults as number | undefined,
+        hotel_children: m.metadata?.hotel_children as number | undefined,
         activities: m.metadata?.activities as ChatMessage['activities'],
         weather: m.metadata?.weather,
         tools_running: [],
@@ -84,7 +90,7 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#F5F8FF]">
+    <div className="flex flex-col h-screen bg-[#F0F9FD]">
       <div className="flex items-center justify-between px-6 py-3 border-b border-black/5 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
@@ -122,7 +128,7 @@ export function ChatWindowWithHistory({ conversationId, initialMessages }: ChatW
           </div>
         )}
         <div className={cn(
-          'flex items-end gap-2 bg-[#F5F8FF] rounded-2xl border transition-all',
+          'flex items-end gap-2 bg-[#F0F9FD] rounded-2xl border transition-all',
           'border-black/8 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100'
         )}>
           {/* Search toggle button */}

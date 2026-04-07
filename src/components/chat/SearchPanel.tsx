@@ -535,7 +535,7 @@ export function SearchPanel({ onClose, onSearch }: SearchPanelProps) {
           className={cn(
             'w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all',
             canSearch()
-              ? 'bg-gradient-to-r from-[#001A3D] to-[#0066FF] text-white hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-brand-500/30'
+              ? 'bg-gradient-to-r from-[#031F30] to-[#177CBC] text-white hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-brand-500/30'
               : 'bg-gray-100 text-gray-300 cursor-not-allowed'
           )}
         >

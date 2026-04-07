@@ -42,25 +42,33 @@ const stats = [
 ]
 
 const suggestions = [
-  'Quero 7 dias em Lisboa em julho para 2 pessoas',
-  'Voos baratos para Cancún em agosto',
-  'O que fazer em Tokyo por 5 dias?',
-  'Pacote completo para Paris no Réveillon',
+  'Quero viajar para Gramado em julho, 2 pessoas, 5 dias',
+  'Voos de São Paulo para Orlando em dezembro, 4 pessoas',
+  'Hotéis em Porto de Galinhas para lua de mel',
+  'Pacote completo São Paulo → Fortaleza, agosto, família com 2 filhos',
 ]
+
+const LOGO_URL = process.env.NEXT_PUBLIC_AGENCY_LOGO || ''
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#F5F8FF]">
+    <div className="min-h-screen bg-[#F0F9FD]">
       {/* Navbar */}
-      <nav className="border-b border-black/5 bg-[#F5F8FF]/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="border-b border-black/5 bg-[#F0F9FD]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-              <Globe size={16} className="text-white" />
-            </div>
-            <span className="font-display text-lg font-semibold text-brand-700">
-              AI Mesquita Turismo
-            </span>
+            {LOGO_URL ? (
+              <img src={LOGO_URL} alt="Mesquita Turismo" className="h-9 w-auto object-contain" />
+            ) : (
+              <>
+                <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+                  <Globe size={16} className="text-white" />
+                </div>
+                <span className="font-display text-lg font-semibold text-brand-700">
+                  AI Mesquita Turismo
+                </span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -121,7 +129,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats */}
-      <section className="bg-brand-500 py-12">
+      <section className="py-12" style={{ background: 'linear-gradient(135deg, #177CBC 0%, #4BBDE8 100%)' }}>
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((s, i) => (
             <div key={i} className="text-center">
@@ -188,7 +196,7 @@ export default function HomePage() {
 
       {/* CTA final */}
       <section className="max-w-6xl mx-auto px-6 py-20 text-center">
-        <div className="bg-brand-500 rounded-3xl px-8 py-14">
+        <div className="rounded-3xl px-8 py-14" style={{ background: 'linear-gradient(135deg, #177CBC 0%, #4BBDE8 100%)' }}>
           <Star size={32} className="text-brand-200 mx-auto mb-4" />
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Comece a planejar agora

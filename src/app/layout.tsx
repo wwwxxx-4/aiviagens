@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0066FF',
+  themeColor: '#177CBC',
 }
 
 export default function RootLayout({
@@ -50,7 +50,7 @@ export default function RootLayout({
               padding: '12px 16px',
             },
             success: {
-              iconTheme: { primary: '#0066FF', secondary: '#FDFAF5' },
+              iconTheme: { primary: '#177CBC', secondary: '#FDFAF5' },
             },
           }}
         />

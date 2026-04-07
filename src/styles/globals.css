@@ -10,13 +10,13 @@
   --font-mono: 'DM Mono', monospace;
 
   /* Brand palette */
-  --color-brand: #0066FF;
-  --color-brand-light: #E6F0FF;
-  --color-brand-dark: #001A3D;
+  --color-brand: #177CBC;
+  --color-brand-light: #EBF8FD;
+  --color-brand-dark: #031F30;
 
   /* Neutral */
-  --color-surface: #F5F8FF;
-  --color-surface-alt: #EEF4FF;
+  --color-surface: #F0F9FD;
+  --color-surface-alt: #EBF8FD;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-strong: rgba(0, 0, 0, 0.15);
 
@@ -52,11 +52,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 102, 255, 0.25);
+  background: rgba(23, 124, 188, 0.25);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 102, 255, 0.5);
+  background: rgba(23, 124, 188, 0.5);
 }
 
 /* Chat message prose */
@@ -70,7 +70,7 @@ body {
 .prose-chat p { margin: 0.5em 0; }
 .prose-chat ul, .prose-chat ol { padding-left: 1.25em; margin: 0.5em 0; }
 .prose-chat li { margin: 0.2em 0; }
-.prose-chat strong { font-weight: 500; color: #0066FF; }
+.prose-chat strong { font-weight: 500; color: #177CBC; }
 .prose-chat code {
   background: rgba(15, 158, 100, 0.08);
   padding: 1px 5px;
@@ -79,7 +79,7 @@ body {
   font-size: 0.875em;
 }
 .prose-chat a {
-  color: #0066FF;
+  color: #177CBC;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -110,18 +110,18 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 102, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(23, 124, 188, 0.12);
 }
 
 /* Focus ring brand */
 .focus-brand:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(23, 124, 188, 0.25);
 }
 
 /* Text gradient brand */
 .text-gradient {
-  background: linear-gradient(135deg, #001A3D 0%, #0066FF 100%);
+  background: linear-gradient(135deg, #031F30 0%, #177CBC 50%, #4BBDE8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
