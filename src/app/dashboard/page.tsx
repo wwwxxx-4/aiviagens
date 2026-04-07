@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { MessageSquare, Briefcase, Plus, Plane, MapPin, TrendingUp } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { DashboardGreeting } from '@/components/ui/DashboardGreeting'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -32,16 +33,12 @@ export default async function DashboardPage() {
     .limit(3)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'Viajante'
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
 
   return (
     <div className="p-8 max-w-5xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-gray-900 mb-1">
-          {greeting}, {firstName}!
-        </h1>
+        <DashboardGreeting firstName={firstName} />
         <p className="text-gray-500">Para onde vamos hoje?</p>
       </div>
 

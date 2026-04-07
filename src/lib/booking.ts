@@ -11,7 +11,7 @@ const DEFAULTS: AgencySettings = {
   email:                process.env.NEXT_PUBLIC_AGENCY_EMAIL           || 'contato@mesquitaturismo.com.br',
   logoUrl:              process.env.NEXT_PUBLIC_AGENCY_LOGO            || '',
   bookingFlightsUrl:    process.env.NEXT_PUBLIC_BOOKING_FLIGHTS_URL    || 'https://www.comprarviagem.com.br/mesquitaturismo',
-  bookingHotelsUrl:     process.env.NEXT_PUBLIC_BOOKING_HOTELS_URL     || 'https://www.comprarviagem.com.br/mesquitaturismo/hotel-list',
+  bookingHotelsUrl:     process.env.NEXT_PUBLIC_BOOKING_HOTELS_URL     || 'https://www.comprarviagem.com.br/mesquitaturismo',
   bookingActivitiesUrl: process.env.NEXT_PUBLIC_BOOKING_ACTIVITIES_URL || 'https://www.civitatis.com/br/?ag_aid=63335',
   markupFlights:        Number(process.env.NEXT_PUBLIC_MARKUP_FLIGHTS    || '0'),
   markupHotels:         Number(process.env.NEXT_PUBLIC_MARKUP_HOTELS     || '0'),

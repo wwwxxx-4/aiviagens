@@ -98,14 +98,21 @@ export default function PackageDetailPage() {
     try {
       const res = await fetch(`/api/export?id=${id}`)
       if (!res.ok) throw new Error('Erro ao gerar exportação')
-      const blob = await res.blob()
+      const html = await res.text()
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
       const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `orcamento-${pkg?.destination?.toLowerCase().replace(/\s+/g, '-') || 'viagem'}.html`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Arquivo baixado! Abra no navegador e use Ctrl+P para imprimir como PDF.')
+      const win = window.open(url, '_blank')
+      if (!win) {
+        // fallback: se popup bloqueado, faz download
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `orcamento-${pkg?.destination?.toLowerCase().replace(/\s+/g, '-') || 'viagem'}.html`
+        a.click()
+        toast.success('Arquivo baixado! Abra-o e use Ctrl+P → Salvar como PDF.')
+      } else {
+        toast.success('Orçamento aberto! Use Ctrl+P → "Salvar como PDF" para baixar.', { duration: 6000 })
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 30000)
     } catch {
       toast.error('Erro ao exportar. Tente novamente.')
     } finally {
@@ -364,7 +371,7 @@ export default function PackageDetailPage() {
           </h2>
           <div className="space-y-2">
             {flights.map((f: any, i: number) => (
-              <FlightCard key={i} flight={f} />
+              <FlightCard key={i} flight={f} adults={pkg.adults} children={pkg.children} />
             ))}
           </div>
         </section>
@@ -381,7 +388,7 @@ export default function PackageDetailPage() {
               const nights = h.check_in && h.check_out
                 ? Math.round((new Date(h.check_out).getTime() - new Date(h.check_in).getTime()) / 86400000)
                 : (pkg.check_in && pkg.check_out ? tripDuration(pkg.check_in, pkg.check_out) : 1)
-              return <HotelCard key={i} hotel={h} nights={nights || 1} />
+              return <HotelCard key={i} hotel={h} nights={nights || 1} adults={pkg.adults} children={pkg.children} />
             })}
           </div>
         </section>

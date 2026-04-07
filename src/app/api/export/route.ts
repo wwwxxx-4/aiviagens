@@ -237,7 +237,7 @@ export async function GET(request: NextRequest) {
 
   /* ── HEADER ── */
   .header{position:relative;overflow:hidden;min-height:220px}
-  .header-bg{position:absolute;inset:0;background:linear-gradient(135deg,#001A3D 0%,#0066FF 100%)}
+  .header-bg{position:absolute;inset:0;background:linear-gradient(135deg,#031F30 0%,#177CBC 100%)}
   .header-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;mix-blend-mode:overlay;opacity:.35}
   .header-content{position:relative;z-index:2;padding:36px 48px 32px}
   .header-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 12px;font-size:10px;color:#fff;letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px}
@@ -253,34 +253,34 @@ export async function GET(request: NextRequest) {
   .body{padding:40px 48px}
   .pkg-separator{text-align:center;margin:32px 0 20px;position:relative}
   .pkg-separator::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:#e5e7eb}
-  .pkg-separator span{position:relative;background:#fff;padding:0 16px;font-weight:700;color:#0066FF;font-size:13px}
+  .pkg-separator span{position:relative;background:#fff;padding:0 16px;font-weight:700;color:#177CBC;font-size:13px}
 
   /* ── SECTION ── */
   .section{margin-bottom:36px}
-  .section-title{font-size:15px;font-weight:700;color:#001A3D;padding-bottom:10px;border-bottom:2px solid #CCE0FF;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+  .section-title{font-size:15px;font-weight:700;color:#031F30;padding-bottom:10px;border-bottom:2px solid #C7EEFA;margin-bottom:18px;display:flex;align-items:center;gap:8px}
 
   /* ── TRIP INFO BAR ── */
-  .trip-info-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;background:#E6F0FF;border:1px solid #CCE0FF;border-radius:12px;padding:12px 18px}
-  .trip-info-item{font-size:12px;color:#001A3D;display:flex;align-items:center;gap:4px}
+  .trip-info-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;background:#EBF8FD;border:1px solid #C7EEFA;border-radius:12px;padding:12px 18px}
+  .trip-info-item{font-size:12px;color:#031F30;display:flex;align-items:center;gap:4px}
 
   /* ── FLIGHT ── */
-  .flight-card{background:#E6F0FF;border:1px solid #99BFFF;border-radius:12px;padding:16px 20px;margin-bottom:12px;overflow:hidden}
+  .flight-card{background:#EBF8FD;border:1px solid #93DCF5;border-radius:12px;padding:16px 20px;margin-bottom:12px;overflow:hidden}
   .flight-leg{padding:4px 0}
   .flight-leg-labeled{padding:6px 0}
-  .flight-leg-label{font-size:10px;font-weight:700;color:#0066FF;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-  .flight-divider{height:1px;background:#CCE0FF;margin:10px 0;border:none}
+  .flight-leg-label{font-size:10px;font-weight:700;color:#177CBC;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+  .flight-divider{height:1px;background:#C7EEFA;margin:10px 0;border:none}
   .flight-route{display:flex;align-items:center;gap:16px;margin-bottom:8px}
-  .flight-airport{font-size:22px;font-weight:800;color:#001A3D;letter-spacing:-0.5px}
+  .flight-airport{font-size:22px;font-weight:800;color:#031F30;letter-spacing:-0.5px}
   .flight-time{font-size:11px;color:#6b7280;margin-top:2px}
   .flight-middle{flex:1;text-align:center}
   .flight-duration{font-size:11px;color:#6b7280;margin-bottom:4px}
-  .flight-line{height:2px;background:linear-gradient(90deg,#99BFFF,#0066FF,#99BFFF);border-radius:2px;position:relative}
-  .flight-line::after{content:'✈';position:absolute;right:-4px;top:-9px;font-size:13px;color:#0066FF}
-  .flight-stops{font-size:10px;color:#0066FF;font-weight:600;margin-top:4px}
+  .flight-line{height:2px;background:linear-gradient(90deg,#93DCF5,#177CBC,#93DCF5);border-radius:2px;position:relative}
+  .flight-line::after{content:'✈';position:absolute;right:-4px;top:-9px;font-size:13px;color:#177CBC}
+  .flight-stops{font-size:10px;color:#177CBC;font-weight:600;margin-top:4px}
   .flight-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-  .flight-tag{background:#fff;border:1px solid #CCE0FF;border-radius:6px;padding:2px 8px;font-size:11px;color:#374151}
-  .flight-price-row{margin-top:10px;padding-top:10px;border-top:1px solid #CCE0FF}
-  .flight-price{font-size:17px;font-weight:700;color:#0066FF}
+  .flight-tag{background:#fff;border:1px solid #C7EEFA;border-radius:6px;padding:2px 8px;font-size:11px;color:#374151}
+  .flight-price-row{margin-top:10px;padding-top:10px;border-top:1px solid #C7EEFA}
+  .flight-price{font-size:17px;font-weight:700;color:#177CBC}
   .flight-price small{font-size:11px;font-weight:400;color:#9ca3af;margin-left:4px}
   .flight-price-disc{font-size:10px;color:#9ca3af;margin-top:2px;font-style:italic}
 
@@ -293,21 +293,21 @@ export async function GET(request: NextRequest) {
   .hotel-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;flex-wrap:wrap;gap:8px}
   .hotel-info{font-size:11px;color:#6b7280;line-height:1.8}
   .hotel-price-block{text-align:right}
-  .hotel-price{font-size:18px;font-weight:700;color:#0066FF}
+  .hotel-price{font-size:18px;font-weight:700;color:#177CBC}
   .hotel-price-detail{font-size:10px;color:#9ca3af;margin-top:1px}
   .hotel-disclaimer{font-size:10px;color:#d97706;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:4px 10px;margin-top:8px}
 
   /* ── ACTIVITIES ── */
   .activities-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .activity-card{background:#f8faff;border:1px solid #CCE0FF;border-radius:10px;overflow:hidden}
+  .activity-card{background:#f8faff;border:1px solid #C7EEFA;border-radius:10px;overflow:hidden}
   .activity-img{width:100%;height:70px;object-fit:cover}
   .activity-body{padding:8px 12px}
-  .activity-name{font-size:12px;font-weight:600;color:#001A3D;margin-bottom:2px}
+  .activity-name{font-size:12px;font-weight:600;color:#031F30;margin-bottom:2px}
   .activity-addr{font-size:10px;color:#6b7280}
   .activity-rating{font-size:10px;color:#d97706;margin-top:3px}
 
   /* ── TOTAL ── */
-  .total-box{background:linear-gradient(135deg,#001A3D,#0066FF);color:#fff;border-radius:16px;padding:24px 32px;margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .total-box{background:linear-gradient(135deg,#031F30,#177CBC);color:#fff;border-radius:16px;padding:24px 32px;margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
   .total-label{font-size:12px;opacity:.75;margin-bottom:4px}
   .total-value{font-size:30px;font-weight:800;letter-spacing:-1px}
   .total-sub{font-size:11px;opacity:.65;margin-top:4px}
@@ -317,14 +317,14 @@ export async function GET(request: NextRequest) {
   .notes-title{font-weight:600;color:#374151;margin-bottom:8px;font-size:13px}
 
   /* ── COMBINED TOTAL ── */
-  .combined-total{background:linear-gradient(135deg,#001A3D,#0066FF);color:#fff;border-radius:16px;padding:28px 40px;margin-top:36px;text-align:center}
+  .combined-total{background:linear-gradient(135deg,#031F30,#177CBC);color:#fff;border-radius:16px;padding:28px 40px;margin-top:36px;text-align:center}
   .combined-total-label{font-size:12px;opacity:.75;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
   .combined-total-value{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
   .combined-total-items{font-size:11px;opacity:.7}
 
   /* ── FOOTER ── */
   .footer{margin-top:40px;padding:20px 48px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#9ca3af;background:#fafafa}
-  .footer-brand{color:#0066FF;font-weight:700;font-size:11px}
+  .footer-brand{color:#177CBC;font-weight:700;font-size:11px}
 
   /* ── AGENCY LOGO ── */
   #agency-logo{display:none;height:44px;width:auto;object-fit:contain;max-width:180px;border-radius:6px;filter:brightness(0) invert(1);margin-bottom:10px}
@@ -410,11 +410,9 @@ export async function GET(request: NextRequest) {
         if (el) {
           el.src = s.logoUrl;
           el.style.display = 'block';
-          // If logo is dark, don't invert; otherwise keep white filter for dark header
           el.style.filter = 'brightness(0) invert(1)';
         }
       }
-      // Override agency name/phone/email if set in localStorage
       if (s.agencyName) {
         document.querySelectorAll('.footer-brand').forEach(function(el){ el.textContent = s.agencyName; });
       }
@@ -422,10 +420,13 @@ export async function GET(request: NextRequest) {
 
     // ── Print button ──
     var btn = document.createElement('button');
-    btn.textContent = '🖨️ Imprimir / Salvar PDF';
-    btn.style = 'position:fixed;bottom:20px;right:20px;background:#0066FF;color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,102,255,.4);z-index:999;font-family:Plus Jakarta Sans,sans-serif';
+    btn.textContent = '🖨️ Salvar como PDF';
+    btn.style = 'position:fixed;bottom:20px;right:20px;background:#177CBC;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(23,124,188,.45);z-index:999;font-family:Plus Jakarta Sans,sans-serif;letter-spacing:.3px';
     btn.onclick = function(){ window.print(); };
     document.body.appendChild(btn);
+
+    // ── Auto-open print dialog after a short delay ──
+    setTimeout(function(){ window.print(); }, 800);
   }
 </script>
 </body>
