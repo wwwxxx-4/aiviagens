@@ -4,6 +4,7 @@ import { Loader2, AlertCircle } from 'lucide-react'
 import { FlightResults } from './FlightCard'
 import { HotelResults, ActivityResults } from './ResultCards'
 import { AgencyPackageResults } from './AgencyPackageCard'
+import { safeHtml } from '@/lib/safeHtml'
 import type { ChatMessage } from '@/hooks/useChat'
 import type { AgencyPackage } from '@/lib/agency-packages'
 
@@ -120,7 +121,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         {message.content && (
           <div
             className="prose-chat text-sm text-gray-800 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+            dangerouslySetInnerHTML={safeHtml(renderMarkdown(message.content))}
           />
         )}
 
